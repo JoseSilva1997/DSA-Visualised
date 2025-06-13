@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <ui:composition template="/templates/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{bundle.EditDataStructuresTitle}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form id="editForm" enctype="multipart/form-data">
+                
+                <!-- Dropdown to select an algorithm -->
+                <h:panelGroup layout="list">
+                    <h:selectOneMenu id="algorithmSelect" value="#{dataStructuresController.selected}">
+                        <f:selectItem itemLabel="-- Select a Data Structure --" itemValue="" noSelectionOption="true" />
+                        <f:selectItems value="#{dataStructuresController.items}" var="dstruct" 
+                                       itemValue="#{dstruct}" itemLabel="#{dstruct.name}" />
+                        <f:ajax render="editForm"/>
+                    </h:selectOneMenu>
+                </h:panelGroup>
+                <br/>
+                
+                <h:panelGrid id="editForm" columns="2">
+                    <h:outputLabel value="#{bundle.EditDataStructuresLabel_name}" for="name" />
+                    <h:inputText id="name" value="#{dataStructuresController.selected.name}" 
+                                 title="#{bundle.EditDataStructuresTitle_name}" required="true" 
+                                 requiredMessage="#{bundle.EditDataStructuresRequiredMessage_name}"
+                                 validatorMessage="Data structure name must be between 1 and 25 characters">
+                        <f:validateLength minimum="1" maximum="25"/>
+                        <f:ajax render="messagePanel"/>
+                    </h:inputText>
+                    
+                    <h:outputLabel value="#{bundle.EditDataStructuresLabel_keyAspects}" for="keyAspects" />
+                    <h:inputTextarea id="keyAspects" value="#{dataStructuresController.selected.keyAspects}" 
+                                     title="#{bundle.EditDataStructuresTitle_keyAspects}"
+                                     rows="2" cols="70"
+                                     validatorMessage="Key aspects must not exceed 500 characters">
+                        <f:validateLength maximum="500"/>
+                        <f:ajax event="blur" render="messagePanel"/>
+                    </h:inputTextarea>
+                    
+                    <h:outputLabel value="#{bundle.EditDataStructuresLabel_operations}" for="operations" />
+                    <h:inputTextarea id="operations" value="#{dataStructuresController.selected.operations}"
+                                     title="#{bundle.EditDataStructuresTitle_operations}"
+                                     rows="2" cols="70"
+                                     validatorMessage="Operations must not exceed 50 characters">
+                        <f:validateLength maximum="50"/>
+                        <f:ajax event="blur" render="messagePanel"/>
+                    </h:inputTextarea>
+                    
+                    <h:outputLabel value="#{bundle.EditDataStructuresLabel_whenToUse}" for="whenToUse" />
+                    <h:inputTextarea id="whenToUse" value="#{dataStructuresController.selected.whenToUse}" 
+                                     title="#{bundle.EditDataStructuresTitle_whenToUse}" 
+                                     rows="2" cols="70"
+                                     validatorMessage="When to use must not exceed 100 characters">
+                        <f:validateLength maximum="100"/>
+                        <f:ajax event="blur" render="messagePanel"/>
+                    </h:inputTextarea>
+                    
+                    <h:outputLabel value="#{bundle.EditDataStructuresLabel_whenNotTo}" for="whenNotTo" />
+                    <h:inputTextarea id="whenNotTo" value="#{dataStructuresController.selected.whenNotTo}" 
+                                     title="#{bundle.EditDataStructuresTitle_whenNotTo}"
+                                     rows="2" cols="70"
+                                     validatorMessage="When not to use must not exceed 100 characters">
+                        <f:validateLength maximum="100"/>
+                        <f:ajax event="blur" render="messagePanel"/>
+                    </h:inputTextarea>
+                    
+                    <h:outputLabel value="Upload Animation:" for="file" />
+                    <h:inputFile id="file" value="#{dataStructuresController.file}"/>
+                </h:panelGrid>
+                <h:commandLink id="saveButton" action="#{dataStructuresController.update}" value="#{bundle.EditDataStructuresSaveLink}">
+                    <f:ajax execute="@form" render="@form messagePanel"/>
+                </h:commandLink>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+
+</html>

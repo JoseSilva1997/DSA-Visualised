@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Stack Animation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1050px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: row;
+            align-self: center;
+            align-items: center;
+            align-content: center;
+            width: 100%;
+            gap: 20px;
+        }
+        .stack-container {
+            border: 2px solid #333;
+            width: 100px;
+            height: 320px;
+            margin-left: 250px;
+            position: block;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            overflow: hidden;
+            background-color: #f8f8f8;
+            font-size: 14px;
+        }
+        .stack-base {
+            margin-left: 250px;
+            text-align: center;
+            font-weight: bold;
+            border-top: 2px solid #333;
+            padding: 5px;
+            background-color: #ddd;
+        }
+        .stack-element {
+            border: 1px solid #333;
+            background-color: #3498db;
+            color: white;
+            padding: 4px;
+            margin: 3px;
+            text-align: center;
+            transition: all 0.5s ease;
+            position: relative;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 400px;
+        }
+        .button-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            flex: 1;
+        }
+        button:hover {
+            background-color: #3498db;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            align-self: left;
+            width: 94%;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+        .delete-animation {
+            animation: fadeOut 0.5s ease forwards;
+        }
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+        }
+        .add-animation {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">     
+        <div class="stack-visualization">
+            <div class="stack-container" id="stack">
+                <!-- Stack elements will appear here -->
+            </div>
+            <div class="stack-base">Stack Base</div>
+        </div>
+        
+        <div class="controls">
+            <div>
+                <input type="text" id="elementInput" placeholder="Enter a value" maxlength="8">
+            </div>
+            <div class="button-group">
+                <button id="pushButton">Push</button>
+                <button id="popButton">Pop</button>
+                <button id="peekButton">Peek</button>
+                <button id="clearButton">Clear</button>
+            </div>
+            <div class="status" id="status"></div>
+        </div>
+        
+
+    </div>
+
+    <script>
+        // Maximum number of elements in the stack
+        const MAX_STACK_SIZE = 10;
+        
+        // Initialize stack array
+        let stack = [];
+        let poppedValue = null; // Variable to store the popped value
+        
+        // DOM elements
+        const stackContainer = document.getElementById('stack');
+        const elementInput = document.getElementById('elementInput');
+        const pushButton = document.getElementById('pushButton');
+        const popButton = document.getElementById('popButton');
+        const peekButton = document.getElementById('peekButton');
+        const clearButton = document.getElementById('clearButton');
+        const statusElement = document.getElementById('status');
+
+        
+        // Function to update the visual stack
+        function updateStackView() {
+            // Clear all stack elements except the base
+            const stackElements = document.querySelectorAll('.stack-element');
+            stackElements.forEach(element => element.remove());
+            
+            // Add each stack element to the container
+            stack.forEach((value, index) => {
+                const element = document.createElement('div');
+                element.className = 'stack-element';
+                element.textContent = value;
+                element.id = `element-${index}`;
+                stackContainer.insertBefore(element, stackContainer.firstChild);
+            });
+            
+            // Update buttons state
+            popButton.disabled = stack.length === 0;
+            peekButton.disabled = stack.length === 0;
+            clearButton.disabled = stack.length === 0;
+            pushButton.disabled = stack.length >= MAX_STACK_SIZE;
+            
+            // Update status
+
+            if (stack.length >= 0 && poppedValue === null) {
+                statusElement.textContent = "Stack is empty";
+            } else if (stack.length >= MAX_STACK_SIZE) {
+                statusElement.textContent = "Stack is full";
+            }
+            
+        }
+        
+        // Log operations (removed)
+        
+        // Push operation
+        pushButton.addEventListener('click', () => {
+            const value = elementInput.value.trim();
+            if (value === '') {
+                alert('Please enter a value!');
+                return;
+            }
+            
+            if (stack.length >= MAX_STACK_SIZE) {
+                alert('Stack overflow! Cannot push more elements.');
+                return;
+            }
+            
+            // Add to stack array
+            stack.push(value);
+            
+            // Add element with animation
+            const element = document.createElement('div');
+            element.className = 'stack-element add-animation';
+            element.textContent = value;
+            element.id = `element-${stack.length - 1}`;
+            stackContainer.insertBefore(element, stackContainer.firstChild);
+            
+
+            
+            // Clear input
+            elementInput.value = '';
+            
+            // Update buttons and status
+            popButton.disabled = false;
+            peekButton.disabled = false;
+            clearButton.disabled = false;
+            pushButton.disabled = stack.length >= MAX_STACK_SIZE;
+            
+            if (stack.length >= MAX_STACK_SIZE) {
+                statusElement.textContent = "Stack is full";
+            } else {
+                statusElement.textContent = `Added '${value}' to the top of the stack. Stack has now ${stack.length} element(s)`;
+            }
+        });
+        
+        // Pop operation
+        popButton.addEventListener('click', () => {
+            if (stack.length === 0) {
+                alert('Stack underflow! Cannot pop from an empty stack.');
+                return;
+            }
+            
+            // Get the top element
+            const topElement = document.querySelector('.stack-element:first-child');
+            
+            // Add animation class
+            topElement.classList.add('delete-animation');
+            
+            // Wait for animation to complete
+            setTimeout(() => {
+                // Remove from stack array
+                poppedValue = stack.pop();
+                
+                if (stack.length === 0) {
+                    statusElement.textContent = `Removed '${poppedValue}' from the top of the stack. Stack is empty`;
+                } else {
+                    statusElement.textContent = `Removed '${poppedValue}' from the top of the stack. Stack has now ${stack.length} element(s)`;
+                }
+
+                updateStackView();
+            }, 500);
+
+        });
+        
+        // Peek operation
+        peekButton.addEventListener('click', () => {
+            if (stack.length === 0) {
+                alert('Stack is empty! Nothing to peek.');
+                return;
+            }
+            
+            const peekValue = stack[stack.length - 1];
+            
+            // Highlight the top element
+            const topElement = document.querySelector('.stack-element:first-child');
+            const originalColor = topElement.style.backgroundColor;
+            
+            topElement.style.backgroundColor = '#ff9800';
+            setTimeout(() => {
+                topElement.style.backgroundColor = originalColor || '#3498db';
+            }, 1000);
+            
+
+            
+            // Show in status
+            statusElement.textContent = `Top element is: ${peekValue}`;
+        });
+        
+        // Clear operation
+        clearButton.addEventListener('click', () => {
+            if (stack.length === 0) {
+                alert('Stack is already empty!');
+                return;
+            }
+            
+            // Clear the stack array
+            stack = [];
+            
+            // Update the view
+            updateStackView();
+            
+
+        });
+        
+        // Initialize the stack view
+        updateStackView();
+        
+        // Allow Enter key to push
+        elementInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !pushButton.disabled) {
+                pushButton.click();
+            }
+        });
+    </script>
+</body>
+</html>

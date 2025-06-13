@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive ArrayList Animation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .explanation {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        .explanation p {
+            margin: 10px 0;
+        }
+        .explanation ul {
+            margin-top: 5px;
+            padding-left: 20px;
+        }
+        .array-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+        .array-visualization {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding: 10px 0;
+            gap: 4px;
+        }
+        .array-element {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f8f8;
+            position: relative;
+            transition: all 0.5s ease;
+        }
+        .array-element .value {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .array-element .index {
+            position: absolute;
+            top: -25px;
+            font-size: 12px;
+            color: #666;
+        }
+        .array-element.empty {
+            background-color: #eee;
+            border: 2px dashed #999;
+        }
+        .array-element.highlight {
+            background-color: #ffeb3b;
+            transform: scale(1.1);
+            z-index: 10;
+        }
+        .array-element.shifting {
+            background-color: #90caf9;
+        }
+        .array-element.new {
+            animation: addElement 0.8s ease forwards;
+        }
+        .array-element.removing {
+            animation: removeElement 0.8s ease forwards;
+        }
+        .array-info {
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+        }
+        .control-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .input-container {
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .input-container label {
+            font-size: 14px;
+            color: #666;
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            flex: 1;
+            min-width: 100px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            font-weight: bold;
+            color: #333;
+            background-color: #f8f8f8;
+            border-radius: 4px;
+            min-height: 45px;
+        }
+        .resize-notification {
+            position: absolute;
+            top: -70px;
+            left: 0;
+            right: 0;
+            background-color: #ffeb3b;
+            color: #333;
+            padding: 10px;
+            text-align: center;
+            border-radius: 4px;
+            animation: slideDown 0.5s ease forwards, fadeOut 0.5s ease 4.5s forwards;
+            z-index: 100;
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        @keyframes addElement {
+            0% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        @keyframes removeElement {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">      
+        <div class="array-container">
+            <div class="array-info">
+                Size: <span id="array-size">0</span> | Capacity: <span id="array-capacity">5</span>
+            </div>
+            <div class="array-visualization" id="array-list">
+                <!-- Array elements will be generated here -->
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="input-group">
+                <div class="input-container">
+                    <label for="valueInput">Value</label>
+                    <input type="text" id="valueInput" placeholder="Enter a value" maxlength="8">
+                </div>
+                <div class="input-container">
+                    <label for="indexInput">Index</label>
+                    <input type="number" id="indexInput" placeholder="Enter an index" min="0" value="0">
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <button id="addButton">Add</button>
+                <button id="addAtButton">Add At</button>
+                <button id="removeButton">Remove</button>
+                <button id="removeAtButton">Remove At</button>
+            </div>
+            
+            <div class="control-group">
+                <button id="clearButton">Clear</button>
+            </div>
+            
+            <div class="status" id="status">ArrayList is empty</div>
+        </div>
+    </div>
+
+    <script>
+        // Initial capacity of the ArrayList
+        const INITIAL_CAPACITY = 5;
+        
+        // Initialize ArrayList
+        let arrayList = [];
+        let arrayCapacity = INITIAL_CAPACITY;
+        
+        // DOM elements
+        const arrayContainer = document.getElementById('array-list');
+        const valueInput = document.getElementById('valueInput');
+        const indexInput = document.getElementById('indexInput');
+        const addButton = document.getElementById('addButton');
+        const addAtButton = document.getElementById('addAtButton');
+        const removeButton = document.getElementById('removeButton');
+        const removeAtButton = document.getElementById('removeAtButton');
+        const setButton = document.getElementById('setButton');
+        const getButton = document.getElementById('getButton');
+        const searchButton = document.getElementById('searchButton');
+        const clearButton = document.getElementById('clearButton');
+        const statusElement = document.getElementById('status');
+        const arraySizeElement = document.getElementById('array-size');
+        const arrayCapacityElement = document.getElementById('array-capacity');
+        
+        // Function to update the visual array
+        function renderArrayList() {
+            // Clear the container
+            arrayContainer.innerHTML = '';
+            
+            // Create elements for each slot in the capacity
+            for (let i = 0; i < arrayCapacity; i++) {
+                const element = document.createElement('div');
+                
+                if (i < arrayList.length) {
+                    element.className = 'array-element';
+                    element.innerHTML = `
+                        <div class="index">${i}</div>
+                        <div class="value">${arrayList[i]}</div>
+                    `;
+                } else {
+                    element.className = 'array-element empty';
+                    element.innerHTML = `
+                        <div class="index">${i}</div>
+                        <div class="value"></div>
+                    `;
+                }
+                
+                arrayContainer.appendChild(element);
+            }
+            
+            // Update size and capacity display
+            arraySizeElement.textContent = arrayList.length;
+            arrayCapacityElement.textContent = arrayCapacity;
+            
+            // Update button states
+            updateButtonStates();
+        }
+        
+        // Function to update button states
+        function updateButtonStates() {
+            const isEmpty = arrayList.length === 0;
+            
+            removeButton.disabled = isEmpty;
+            removeAtButton.disabled = isEmpty;
+            getButton.disabled = isEmpty;
+            setButton.disabled = isEmpty;
+            searchButton.disabled = isEmpty;
+            clearButton.disabled = isEmpty;
+            
+            // Update index input max value
+            indexInput.max = Math.max(0, arrayList.length - 1);
+            
+            // Update status
+            if (isEmpty) {
+                statusElement.textContent = "ArrayList is empty";
+            } else {
+                statusElement.textContent = `ArrayList has ${arrayList.length} element(s)`;
+            }
+        }
+        
+        // Function to resize the array when needed
+        function resizeArray() {
+            // Double the capacity
+            arrayCapacity *= 2;
+            
+            // Update visual and status
+            arrayCapacityElement.textContent = arrayCapacity;
+            statusElement.textContent = `ArrayList resized: capacity doubled to ${arrayCapacity}`;
+            
+            // Add a visual explanation
+            const notification = document.createElement('div');
+            notification.className = 'resize-notification';
+            notification.textContent = 'When an ArrayList reaches capacity, it doubles in size to accommodate more elements';
+            document.querySelector('.array-container').appendChild(notification);
+            
+            // Remove the notification after 5 seconds
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+            
+            // Re-render the array
+            renderArrayList();
+        }
+        
+        // Function to highlight an element at a given index
+        function highlightElement(index, className = 'highlight', duration = 1000) {
+            const elements = document.querySelectorAll('.array-element');
+            if (index >= 0 && index < elements.length) {
+                elements[index].classList.add(className);
+                
+                setTimeout(() => {
+                    elements[index].classList.remove(className);
+                }, duration);
+            }
+        }
+        
+        // Function to shift elements (animate shifting)
+        async function animateShift(startIndex, endIndex, isInsertion = true) {
+            return new Promise(resolve => {
+                const elements = document.querySelectorAll('.array-element');
+                const elementsToShift = [];
+                
+                // Mark elements to be shifted
+                if (isInsertion) {
+                    // Shift right when inserting
+                    for (let i = endIndex; i >= startIndex; i--) {
+                        if (i < elements.length) {
+                            elements[i].classList.add('shifting');
+                            elementsToShift.push(elements[i]);
+                        }
+                    }
+                } else {
+                    // Shift left when removing
+                    for (let i = startIndex; i <= endIndex; i++) {
+                        if (i < elements.length) {
+                            elements[i].classList.add('shifting');
+                            elementsToShift.push(elements[i]);
+                        }
+                    }
+                }
+                
+                // After animation completes
+                setTimeout(() => {
+                    elementsToShift.forEach(el => el.classList.remove('shifting'));
+                    resolve();
+                }, 500);
+            });
+        }
+        
+        // Add operation (at the end)
+        addButton.addEventListener('click', async () => {
+            const value = valueInput.value.trim();
+            if (value === '') {
+                alert('Please enter a value!');
+                return;
+            }
+            
+            // Check if resize is needed
+            if (arrayList.length >= arrayCapacity) {
+                resizeArray();
+            }
+            
+            // Add to array
+            arrayList.push(value);
+            
+            // Re-render with animation
+            renderArrayList();
+            highlightElement(arrayList.length - 1, 'new');
+            
+            // Clear input
+            valueInput.value = '';
+            
+            // Update status
+            statusElement.textContent = `Added "${value}" at index ${arrayList.length - 1} (end of the list)`;
+        });
+        
+        // Add At operation (at specific index)
+        addAtButton.addEventListener('click', async () => {
+            const value = valueInput.value.trim();
+            const index = parseInt(indexInput.value);
+            
+            if (value === '') {
+                alert('Please enter a value!');
+                return;
+            }
+            
+            if (isNaN(index) || index < 0 || index > arrayList.length) {
+                alert(`Index must be between 0 and ${arrayList.length}`);
+                return;
+            }
+            
+            // Check if resize is needed
+            if (arrayList.length >= arrayCapacity) {
+                resizeArray();
+            }
+            
+            // Animate shifting if needed
+            if (index < arrayList.length) {
+                await animateShift(index, arrayList.length, true);
+            }
+            
+            // Insert into array
+            arrayList.splice(index, 0, value);
+            
+            // Re-render with animation
+            renderArrayList();
+            highlightElement(index, 'new');
+            
+            // Clear input
+            valueInput.value = '';
+            
+            // Update status
+            statusElement.textContent = `Added "${value}" at index ${index}`;
+        });
+        
+        // Remove operation (from the end)
+        removeButton.addEventListener('click', async () => {
+            if (arrayList.length === 0) {
+                alert('ArrayList is empty!');
+                return;
+            }
+            
+            // Highlight the element to be removed
+            highlightElement(arrayList.length - 1, 'removing');
+            
+            // Get the value to display in status
+            const removedValue = arrayList[arrayList.length - 1];
+            
+            // Wait for animation to complete
+            setTimeout(() => {
+                // Remove from array
+                arrayList.pop();
+                
+                // Re-render
+                renderArrayList();
+                
+                // Update status
+                statusElement.textContent = `Removed "${removedValue}" from the end`;
+            }, 800);
+        });
+        
+        // Remove At operation (from specific index)
+        removeAtButton.addEventListener('click', async () => {
+            const index = parseInt(indexInput.value);
+            
+            if (arrayList.length === 0) {
+                alert('ArrayList is empty!');
+                return;
+            }
+            
+            if (isNaN(index) || index < 0 || index >= arrayList.length) {
+                alert(`Index must be between 0 and ${arrayList.length - 1}`);
+                return;
+            }
+            
+            // Highlight the element to be removed
+            highlightElement(index, 'removing');
+            
+            // Get the value to display in status
+            const removedValue = arrayList[index];
+            
+            // Wait for animation
+            setTimeout(async () => {
+                // Animate shifting if needed
+                if (index < arrayList.length - 1) {
+                    await animateShift(index + 1, arrayList.length - 1, false);
+                }
+                
+                // Remove from array
+                arrayList.splice(index, 1);
+                
+                // Re-render
+                renderArrayList();
+                
+                // Update status
+                statusElement.textContent = `Removed "${removedValue}" from index ${index}`;
+            }, 800);
+        });
+        
+        // Removed Set, Get, and Search operations as requested
+        
+        // Clear operation
+        clearButton.addEventListener('click', () => {
+            // Clear the array
+            arrayList = [];
+            
+            // Reset capacity to initial
+            arrayCapacity = INITIAL_CAPACITY;
+            
+            // Re-render
+            renderArrayList();
+            
+            // Update status
+            statusElement.textContent = 'ArrayList cleared';
+        });
+        
+        // Initialize the array visualization
+        renderArrayList();
+        
+        // Allow Enter key to add when focused on inputs
+        valueInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addButton.click();
+            }
+        });
+        
+        indexInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addAtButton.click();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/XHtml.xhtml to edit this template
+-->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://xmlns.jcp.org/jsf/passthrough">
+    
+    <h:body>
+        <ui:composition template="/templates/template.xhtml">
+            <ui:define name="body">
+                <h:panelGroup layout="block" styleClass="page-and-header-layout">
+                    <h:panelGroup layout="block" styleClass="login-registration-panel">
+                        <h:outputText value="Sign up" styleClass="form-title"/>
+                        
+                        <h:form id="signupForm" styleClass="login-registration-form">
+                            <h:panelGroup id="messagePanel" layout="block">
+                                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table" globalOnly='true'/>
+                            </h:panelGroup>
+                            
+                            <!-- Username -->
+                            <h:message id="usernameError" for="usernameInputText" styleClass="login-registration-error-messages"/>
+                            <h:inputText id="usernameInputText" 
+                                         styleClass="textfield-input"
+                                         value="#{usersController.selected.username}"
+                                         required="true"
+                                         requiredMessage="Username is required"
+                                         p:placeholder="Username"
+                                         validatorMessage="Username must be 3-25 characters long. Only alphanumeric characters and underscores.">
+                                <f:validateLength minimum="3" maximum="25"/>
+                                <f:validateRegex pattern="^[a-zA-Z0-9_]{3,25}$"/>
+                                <f:ajax event='blur' render="usernameError"/>
+                            </h:inputText>
+                            
+                            <!-- Password -->
+                            <h:message id="passwordError" for="passwordInputText" styleClass="login-registration-error-messages"/>
+                            <h:inputSecret id="passwordInputText"
+                                           value="#{usersController.selected.password}"
+                                           styleClass="textfield-input" 
+                                           required="true"
+                                           requiredMessage="Password is required"
+                                           p:placeholder="Password"
+                                           validatorMessage="Password must meet all requirements">
+                                <f:validateLength minimum="8" maximum="25"/>
+                                <f:validateRegex pattern="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&amp;*()_+\-=\[\]{};':&quot;\\|,.&lt;&gt;\/?]).{8,25}$" />
+                                <f:ajax event='blur' render='passwordError'/>
+                                <f:ajax event='focus' onevent='showPasswordRequirements()' />
+                                <f:ajax event='blur' onevent='hidePasswordRequirements()' />
+                                <f:ajax event='keyup' onevent='updatePasswordRequirements()' />
+                            </h:inputSecret>
+                            
+                            <!-- Password strength validation -->
+                            <h:panelGroup id="passwordRequirements" styleClass="password-requirements">
+                                <h:outputText value="Password requirements:" style="font-weight: bold;" />
+                                <h:panelGroup layout="block" id="length-req" styleClass="requirement">At least 8 characters</h:panelGroup>
+                                <h:panelGroup layout="block" id="uppercase-req" styleClass="requirement">At least 1 uppercase letter</h:panelGroup>
+                                <h:panelGroup layout="block" id="number-req" styleClass="requirement">At least 1 number</h:panelGroup>
+                                <h:panelGroup layout="block" id="special-req" styleClass="requirement">At least 1 special character</h:panelGroup>
+                            </h:panelGroup>
+                                
+                            <!-- Confirm password -->
+                            <h:message id="confirmPasswordError" for="confirmPasswordInputText" styleClass="login-registration-error-messages"/>
+                            <h:inputSecret id="confirmPasswordInputText"
+                                           value="#{confirmPasswordBean.confirmPassword}"
+                                           styleClass="textfield-input" 
+                                           required="true"
+                                           requiredMessage="Confirm password"
+                                           p:placeholder="Confirm password"
+                                           validator="#{confirmPasswordBean.validatePasswordMatch}">
+                                <f:ajax event="keyup" execute="passwordInputText confirmPasswordInputText" render="confirmPasswordError"/>
+                            </h:inputSecret>
+                            
+                            <!-- Email -->
+                            <h:message id="emailError" for="emailInputText" styleClass="login-registration-error-messages"/>
+                            <h:inputText id="emailInputText" 
+                                         value="#{usersController.selected.email}"
+                                         styleClass="textfield-input" 
+                                         required="true"
+                                         requiredMessage="Email is required"
+                                         p:placeholder="Email"
+                                         validatorMessage="Please enter a valid email address">
+                                <f:validateRegex pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"/>
+                                <f:ajax event='blur' render="emailError"/>
+                            </h:inputText>
+                            
+                            <!-- First name -->
+                            <h:message id="firstNameError" for="firstnameInputText" styleClass="login-registration-error-messages"/>
+                            <h:inputText id="firstnameInputText"
+                                         value="#{usersController.selected.firstName}"
+                                         styleClass="textfield-input" 
+                                         required="true"
+                                         requiredMessage="First name is required"
+                                         p:placeholder="First name"
+                                         validatorMessage = "First name must be 2-30 characters long">
+                                <f:validateLength minimum="2" maximum="30"/>
+                                <f:ajax event='blur' render="firstNameError"/>
+                            </h:inputText>
+                            
+                            <!-- Last name -->
+                            <h:message id="lastNameError" for="lastNameInputText" styleClass="login-registration-error-messages"/>
+                            <h:inputText id="lastNameInputText"
+                                         value="#{usersController.selected.lastName}"
+                                         styleClass="textfield-input" 
+                                         required="true"
+                                         requiredMessage="Last name is required"
+                                         p:placeholder="Last name"
+                                         validatorMessage="Last name must be 2-30 characters long">
+                                <f:validateLength minimum="2" maximum="30"/>
+                                <f:ajax event='blur' render="lastNameError"/>         
+                            </h:inputText>
+                            
+                            
+                            <h:commandButton value="Sign Up" action="#{usersController.create}" styleClass="login-register-button">
+                                <f:ajax execute="@form" render="@form"/>
+                            </h:commandButton>
+                            
+                            <div class="login-register-text">
+                                Already have an account?
+                                <h:link outcome="/login.xhtml" value="Log in" styleClass="login-register-link"/>
+                            </div>
+                        </h:form>
+                    </h:panelGroup>
+                </h:panelGroup>
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>

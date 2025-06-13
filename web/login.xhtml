@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/XHtml.xhtml to edit this template
+-->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://xmlns.jcp.org/jsf/passthrough">
+    
+    <h:body>
+        <ui:composition template="/templates/template.xhtml">
+            <ui:define name="body">
+                <h:panelGroup layout="block" class="page-and-header-layout">
+                    <h:panelGroup layout="block" styleClass="login-registration-panel">
+                        <h:outputText value="Log in" styleClass="form-title"/>
+                        
+                        <h:form id="loginForm" styleClass="login-registration-form">
+                            <h:messages id="errorMessages" globalOnly="true" styleClass="login-registration-error-messages" layout="list"/>
+                            
+                            
+                            <h:message id="usernameError" for="usernameInputText" styleClass="login-registration-error-messages"/>
+                            <h:message id="passwordError" for="passwordInputText" styleClass="login-registration-error-messages"/>
+                            <h:inputText id="usernameInputText" styleClass="textfield-input" 
+                                         value="#{loginBean.username}" 
+                                         required="true" 
+                                         requiredMessage="Please fill in your username" 
+                                         p:placeholder="Username"
+                                         validatorMessage="Wrong username or password"
+                                         onkeydown="clearErrorMessages()">
+                                <f:validateLength minimum="3" maximum="25"/>
+                                <f:validateRegex pattern="^[a-zA-Z0-9_]{3,25}$"/>
+                                <f:ajax event="blur" render="usernameError"/>
+                            </h:inputText>
+                            
+                            
+                            <h:inputSecret id="passwordInputText" styleClass="textfield-input" 
+                                           value="#{loginBean.password}" 
+                                           required="true" 
+                                           requiredMessage="Please fill in your password" 
+                                           p:placeholder="Password"
+                                           validatorMessage="Wrong username or password"
+                                           onkeydown="clearErrorMessages()">
+                                <f:validateLength minimum="8" maximum="25"/>
+                                <f:ajax event="blur" render="passwordError"/>
+                            </h:inputSecret>
+                            
+                                                        
+                            <h:commandButton value="Log in" action="#{loginBean.validateUser}" styleClass="login-register-button">
+                                <f:ajax execute="@form" render="errorMessages usernameError passwordError"/>
+                            </h:commandButton>
+                            <div class="login-register-text">
+                                Don't have an account?
+                                <h:link outcome="/signup.xhtml" value="Sign up" styleClass="login-register-link"/>
+                            </div>
+                        </h:form>
+                    </h:panelGroup>
+                </h:panelGroup>
+                
+                <h:outputScript>
+                    // This script clears error messages once the user starts typing a new entry.
+                    function clearErrorMessages() {
+                        // Clear global messages
+                        let errorMessages = document.getElementById('loginForm:errorMessages');
+                        if (errorMessages) {
+                            errorMessages.innerHTML = '';
+                        }
+                        
+                        // Clear field-specific messages
+                        let usernameError = document.getElementById('loginForm:usernameError');
+                        let passwordError = document.getElementById('loginForm:passwordError');
+                        
+                        if (usernameError) {
+                            usernameError.innerHTML = '';
+                        }
+                        
+                        if (passwordError) {
+                            passwordError.innerHTML = '';
+                        }
+                    }
+                </h:outputScript>
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <ui:composition template="/templates/template.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{bundle.EditAlgorithmsTitle}"></h:outputText>
+        </ui:define>
+        <ui:define name="body">
+                
+           
+            <h:panelGroup id="messagePanel" layout="block">
+                <h:messages errorStyle="color: red" infoStyle="color: green" layout="table"/>
+            </h:panelGroup>
+            <h:form id="editForm" enctype="multipart/form-data">
+                <!-- Dropdown to select an algorithm -->
+                <h:panelGroup layout="list">
+                    <h:selectOneMenu id="algorithmSelect" value="#{algorithmsController.selected}">
+                        <f:selectItem itemLabel="-- Select an Algorithm --" itemValue="" noSelectionOption="true" />
+                        <f:selectItems value="#{algorithmsController.items}" var="algorithm" 
+                                       itemValue="#{algorithm}" itemLabel="#{algorithm.name}" />
+                        <f:ajax render="editForm"/>
+                    </h:selectOneMenu>
+                </h:panelGroup>
+                <br/>
+                <h:panelGrid columns="2">
+                    <h:outputLabel value="#{bundle.EditAlgorithmsLabel_name}" for="name" />
+                    <h:inputText id="name" value="#{algorithmsController.selected.name}" 
+                                 title="#{bundle.EditAlgorithmsTitle_name}" 
+                                 required="true" requiredMessage="#{bundle.EditAlgorithmsRequiredMessage_name}"
+                                 validatorMessage="Algorithm name must be between 1 and 25 characters">
+                        <f:validateLength minimum="1" maximum="25"/>
+                        <f:ajax event="blur" render="messagePanel"/>
+                    </h:inputText>
+                   
+                    <h:outputLabel value="#{bundle.EditAlgorithmsLabel_description}" for="description" />
+                    <h:inputTextarea id="description" value="#{algorithmsController.selected.description}"
+                                     title="#{bundle.EditAlgorithmsTitle_description}"
+                                     rows="4" cols="70"
+                                     validatorMessage="Description must not exceed 500 characters">
+                            <f:validateLength maximum="500"/>
+                            <f:ajax event="blur" render="messagePanel"/>
+                    </h:inputTextarea>
+                    
+                    <h:outputLabel value="#{bundle.EditAlgorithmsLabel_BTimeComplexity}" for="BTimeComplexity" />
+                    <h:selectOneMenu id="BTimeComplexity" value="#{algorithmsController.selected.BTimeComplexity}" title="#{bundle.EditAlgorithmsTitle_BTimeComplexity}">
+                        <f:selectItem itemLabel="Select Best Time Complexity" itemValue="" noSelectionOption="true" />
+                        <f:selectItems value="#{algorithmsController.timeComplexities}" />
+                        <f:ajax event="change" render="messagePanel"/>
+                    </h:selectOneMenu>
+                    
+                    <h:outputLabel value="#{bundle.EditAlgorithmsLabel_WTimeComplexity}" for="WTimeComplexity" />
+                    <h:selectOneMenu id="WTimeComplexity" value="#{algorithmsController.selected.WTimeComplexity}" title="#{bundle.EditAlgorithmsTitle_WTimeComplexity}">
+                        <f:selectItem itemLabel="Select Worst Time Complexity" itemValue="" noSelectionOption="true" />
+                        <f:selectItems value="#{algorithmsController.timeComplexities}" />
+                        <f:ajax event="change" render="messagePanel"/>
+                    </h:selectOneMenu>
+                    
+                    <h:outputLabel value="#{bundle.EditAlgorithmsLabel_isStable}" for="isStable" />
+                    <h:selectBooleanCheckbox id="isStable" value="#{algorithmsController.selected.isStable}" title="#{bundle.EditAlgorithmsTitle_isStable}" />
+
+                    <h:outputLabel value="#{bundle.EditAlgorithmsLabel_isInPlace}" for="isInPlace" />
+                    <h:selectBooleanCheckbox id="isInPlace" value="#{algorithmsController.selected.isInPlace}" title="#{bundle.EditAlgorithmsTitle_isInPlace}" />
+                    
+                    <h:outputLabel value="Upload Animation:" for="file" />
+                    <h:inputFile id="file" value="#{algorithmsController.file}"/>
+                </h:panelGrid>
+                <br/>
+                <h:commandLink action="#{algorithmsController.update}" value="#{bundle.EditAlgorithmsSaveLink}">
+                    <f:ajax execute="@form" render="@form messagePanel"/>
+                </h:commandLink>
+            </h:form>
+        </ui:define>
+    </ui:composition>
+</html>

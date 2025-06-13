@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Insertion Sort Animation</title>
+  <style>
+    body {
+      font-family: 'Open Sans', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+    }
+    .m-container {
+        margin: auto;
+        display: block;
+        border-radius: 8px;
+        width: 1100px;
+    }
+    .main-container {
+      display: flex;
+      width: 100%;
+      max-width: 1100px;
+    }
+    .array-container {
+      display: flex;
+      align-items: flex-end;
+      height: 350px;
+      margin-left: 50px;
+      flex-grow: 1;
+      position: relative;
+    }
+    .current-display {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: #9b59b6;
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      font-weight: bold;
+      z-index: 10;
+    }
+    .array-bar {
+      flex-grow: 1;
+      margin: 0 5px;
+      background-color: #3498db;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      color: white;
+      font-weight: bold;
+      position: relative;
+      transition: background-color 0.3s;
+    }
+    .array-bar span {
+      padding: 5px;
+    }
+    .controls {
+        margin: auto;
+        display: flex;
+        justify-content: center;
+        padding:10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 0 5px;
+      cursor: pointer;
+      background-color: #2980b9;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #3498db;
+    }
+    .instructions {
+      margin-top: 50px;
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .pseudocode {
+      width: 320px;
+      margin-left: 60px;
+      background-color: transparent;
+      border-radius: 8px;
+      font-family: monospace;
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      height: 350px; /* Match the height of array-container */
+    }
+    .pseudocode pre {
+      margin: 0;
+      white-space: pre-wrap;
+    }
+    .highlight {
+      background-color: #ffeb3b;
+      font-weight: bold;
+      display: inline;
+    }
+    .sorted {
+      background-color: #2ecc71;
+    }
+    .comparison {
+      background-color: #e74c3c;
+    }
+    .current {
+      background-color: #9b59b6;
+    }
+    .current-j-position {
+      outline: 3px dashed #f39c12;
+      outline-offset: -3px;
+    }
+    .legend {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 20px;
+      width: 90%;
+      max-width: 1000px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin: 5px 15px;
+    }
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+      border-radius: 3px;
+    }
+    .legend-border {
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+      outline: 3px dashed #f39c12;
+      outline-offset: -3px;
+    }
+  </style>
+</head>
+<body>
+    <div class="m-container">
+       <div class="controls">
+        <button id="nextButton">Next Step</button>
+        <button id="resetButton">Reset</button>
+        <button id="autoPlayButton">Auto Play</button>
+      </div>
+      <div class="main-container">
+        <div class="array-container" id="arrayContainer">
+          <div class="current-display" id="currentDisplay" style="display: none;">Current: <span id="currentDisplayValue"></span></div>
+        </div>
+        <div class="pseudocode" id="pseudocode">
+          <pre id="pseudocodeText">
+    function insertionSort(array):
+      n = array.length
+
+      for i = 1 to n-1
+        current = array[i]
+
+        j = i - 1
+        while j > 0 and array[j] > current
+          array[j+1] = array[j]
+          j--
+        end while
+
+        array[j+1] = current
+      end for
+
+      return array
+    end function</pre>
+        </div>
+      </div>
+    </div>
+  
+  <div class="instructions" id="instructions"></div>
+  
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: #3498db;"></div>
+      <div>Array Element</div>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: #2ecc71;"></div>
+      <div>Sorted</div>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: #e74c3c;"></div>
+      <div>Element Being Compared</div>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: #9b59b6;"></div>
+      <div>Current Element</div>
+    </div>
+    <div class="legend-item">
+      <div class="legend-border"></div>
+      <div>Current j Position</div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize the array and DOM elements
+    let array = [];
+    const arrayContainer = document.getElementById('arrayContainer');
+    const nextButton = document.getElementById('nextButton');
+    const resetButton = document.getElementById('resetButton');
+    const autoPlayButton = document.getElementById('autoPlayButton');
+    const instructions = document.getElementById('instructions');
+    const pseudocodeText = document.getElementById('pseudocodeText');
+    const currentDisplay = document.getElementById('currentDisplay');
+    const currentDisplayValue = document.getElementById('currentDisplayValue');
+    let autoPlaySpeed = 1000;
+
+    // Insertion sort state
+    let i = 1;             // Current element to be inserted
+    let j = 0;             // Position for comparison
+    let current = null;    // Current element being positioned
+    let autoPlayInterval = null;
+    let phase = 'start';   // Current phase: 'start', 'saveCurrent', 'compare', 'shift', 'insert', 'nextIter', 'completed'
+    let sortedIndices = [0]; // Track sorted portion (first element starts as sorted)
+
+    // Pseudocode lines that correspond to different phases
+    const pseudocodeLines = {
+      beforeStart: [1, 2],
+      start: [4],         // for loop start
+      saveCurrent: [4, 5],   // current = array[i]
+      compareInit: [4, 7],   // j = i - 1
+      compare: [4, 8],       // while condition
+      shift: [4, 8, 9],      // shift element
+      decrementJ: [4, 8, 10],// j = j - 1
+      insert: [4, 11],       // array[j+1] = current
+      nextIter: [4, 13],         // for loop (next iteration)
+      completed: [18, 19]    // return and end function
+    };
+
+    // Update current display
+    function updateCurrentDisplay() {
+      if (current !== null) {
+        currentDisplay.style.display = 'block';
+        currentDisplayValue.textContent = current;
+      } else {
+        currentDisplay.style.display = 'none';
+      }
+    }
+
+    // Generate a random array
+    function generateArray() {
+      array = Array.from({ length: 8 }, () => Math.floor(Math.random() * 90) + 10);
+      resetState();
+      renderArray();
+      updateCurrentDisplay();
+      updateInstructions("Click 'Next Step' to start sorting. The first element is considered sorted.");
+      highlightPseudocode('beforeStart');
+    }
+
+    // Render the array as bars with numbers
+    function renderArray() {
+      // Save the current display element
+      const currentDisplayElement = document.getElementById('currentDisplay');
+      
+      // Clear the array container but preserve the current display
+      arrayContainer.innerHTML = '';
+      
+      // Add back the current display
+      arrayContainer.appendChild(currentDisplayElement);
+      
+      array.forEach((value, index) => {
+        const bar = document.createElement('div');
+        bar.classList.add('array-bar');
+        bar.style.height = `${value * 2.5}px`;
+        
+        const valueLabel = document.createElement('span');
+        valueLabel.textContent = value;
+        bar.appendChild(valueLabel);
+        
+        // Apply different styles based on the sorting state
+        if (sortedIndices.includes(index)) {
+          bar.classList.add('sorted');
+        }
+        
+        // Apply comparison highlight during any of the comparison phases
+        if ((phase === 'compare' || phase === 'shift' || phase === 'decrementJ') && index === j) {
+          bar.classList.add('comparison');
+        }
+
+        if ((phase === 'saveCurrent' || phase === 'compare' || phase === 'shift' || phase === 'decrementJ' || phase === 'insert') && index === j + 1) {
+          bar.classList.add('current-j-position');
+        }
+        
+        if (phase === 'saveCurrent' && index === i) {
+          bar.classList.add('current');
+        }
+        
+        arrayContainer.appendChild(bar);
+      });
+    }
+
+    // Reset the sorting state
+    function resetState() {
+      i = 1;
+      j = 0;
+      current = null;
+      phase = 'start';
+      sortedIndices = [0]; // First element is always considered sorted
+      stopAutoPlay();
+      updateCurrentDisplay();
+    }
+
+    // Update the instructions
+    function updateInstructions(text) {
+      instructions.textContent = text;
+    }
+
+    // Highlight the current step in the pseudocode
+    function highlightPseudocode(currentPhase) {
+      // First, remove any existing highlights
+      const lines = pseudocodeText.textContent.split('\n');
+      const highlightedLines = [];
+
+      lines.forEach((line, index) => {
+        // Check if this line should be highlighted
+        const lineNumber = index + 1;
+        if (pseudocodeLines[currentPhase] && pseudocodeLines[currentPhase].includes(lineNumber)) {
+            
+            const indentation = line.match(/^\s*/)[0]; // Get leading whitespace
+            const codeText = line.substring(indentation.length);// Get the actual code
+            
+          highlightedLines.push(`${indentation}<span class="highlight">${codeText}</span>`); 
+        } else {
+          highlightedLines.push(line);
+        }
+      });
+
+      pseudocodeText.innerHTML = highlightedLines.join('\n');
+    }
+
+    // Perform one step of the insertion sort
+    function insertionSortStep() {
+      if (phase === 'completed') {
+        updateInstructions("Sorting complete!");
+        highlightPseudocode('completed');
+        return false;
+      }
+
+      if (phase === 'start') {
+        if (i >= array.length) {
+          // Sorting is complete
+          phase = 'completed';
+          highlightPseudocode('completed');
+          updateInstructions("Sorting complete!");
+          return false;
+        }
+
+        j = i - 1;
+        updateInstructions(`Starting with element at index ${i}: ${array[i]}`);
+        phase = 'saveCurrent';
+        highlightPseudocode('start');
+        renderArray();
+        return true;
+      }
+
+      if (phase === 'saveCurrent') {
+        current = array[i];
+        updateCurrentDisplay();
+        updateInstructions(`Saving current element ${current} to insert into the sorted portion`);
+        phase = 'compareInit';
+        highlightPseudocode('saveCurrent');
+        renderArray();
+        return true;
+      }
+
+      if (phase === 'compareInit') {
+        j = i - 1;
+        updateInstructions(`Beginning comparisons with j = ${j}`);
+        phase = 'compare';
+        highlightPseudocode('compare');
+        renderArray();
+        return true;
+      }
+
+      if (phase === 'compare') {
+        if (j >= 0 && array[j] > current) {
+          updateInstructions(`${array[j]} > ${current}, need to shift ${array[j]} to the right`);
+          phase = 'shift';
+          highlightPseudocode('compare');
+        } else {
+          updateInstructions(`Found correct position for ${current} at index ${j+1}`);
+          phase = 'insert';
+          highlightPseudocode('insert');
+        }
+        renderArray();
+        return true;
+      }
+
+      if (phase === 'shift') {
+        array[j + 1] = array[j];
+        updateInstructions(`Shifted ${array[j]} from position ${j} to position ${j+1}`);
+        phase = 'decrementJ';
+        highlightPseudocode('shift');
+        renderArray();
+        return true;
+      }
+
+      if (phase === 'decrementJ') {
+        j--;
+        if (j >= 0) {
+          updateInstructions(`Moving to compare with previous element at position ${j}`);
+          phase = 'compare';
+          highlightPseudocode('compare');
+        } else {
+          updateInstructions(`Reached beginning of array, ready to insert ${current} at position 0`);
+          phase = 'insert';
+          highlightPseudocode('insert');
+        }
+        renderArray();
+        return true;
+      }
+
+      if (phase === 'insert') {
+        array[j + 1] = current;
+        updateInstructions(`Inserted ${current} at position ${j+1}`);
+        
+        // Update sorted indices
+        for (let idx = 0; idx <= i; idx++) {
+          if (!sortedIndices.includes(idx)) {
+            sortedIndices.push(idx);
+          }
+        }
+        
+        i++; // Move to next element
+        current = null; // Reset current to null after insertion
+        updateCurrentDisplay();
+        phase = 'start';
+        highlightPseudocode('nextIter');
+        renderArray();
+        return true;
+      }
+
+      return false;
+    }
+
+    // Auto-play functionality
+    function startAutoPlay() {
+      if (autoPlayInterval === null) {
+        autoPlayButton.textContent = "Stop Auto";
+        autoPlayInterval = setInterval(() => {
+          const continueSort = insertionSortStep();
+          if (!continueSort) {
+            stopAutoPlay();
+          }
+        }, autoPlaySpeed);
+      }
+    }
+
+    function stopAutoPlay() {
+      if (autoPlayInterval !== null) {
+        clearInterval(autoPlayInterval);
+        autoPlayInterval = null;
+        autoPlayButton.textContent = "Auto Play";
+      }
+    }
+
+    // Event listeners for buttons
+    nextButton.addEventListener('click', () => {
+      stopAutoPlay();
+      insertionSortStep();
+    });
+
+    resetButton.addEventListener('click', () => {
+      generateArray();
+    });
+
+    autoPlayButton.addEventListener('click', () => {
+      if (autoPlayInterval === null) {
+        startAutoPlay();
+      } else {
+        stopAutoPlay();
+      }
+    });
+
+    // Initialize
+    generateArray();
+  </script>
+</body>
+</html>

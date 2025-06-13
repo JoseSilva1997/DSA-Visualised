@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Binary Search Animation</title>
+  <style>
+    body {
+      font-family: 'Open Sans', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+    }
+    .m-container {
+        margin: auto;
+        display: block;
+        border-radius: 8px;
+        width: 1100px;
+    }
+    .main-container {
+      display: flex;
+      width: 100%;
+      max-width: 1100px;
+    }
+    .array-container {
+      display: flex;
+      align-items: flex-end;
+      height: 350px;
+      margin-left: 50px;
+      flex-grow: 1;
+      position: relative;
+    }
+    .target-display {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: #e74c3c;
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      font-weight: bold;
+      z-index: 10;
+    }
+    .array-bar {
+      flex-grow: 1;
+      margin: 0 2px;
+      background-color: #3498db;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      color: white;
+      font-weight: bold;
+      position: relative;
+      transition: background-color 0.3s;
+      min-height: 60px;
+    }
+    .array-bar .value {
+      padding: 5px;
+      margin-bottom: 2px;
+      border-radius: 3px;
+      min-width: 25px;
+      text-align: center;
+    }
+    .array-bar .index {
+      font-size: 12px;
+      color: #333;
+      background-color: rgba(255,255,255,0.8);
+      padding: 2px 4px;
+      border-radius: 2px;
+      margin-top: auto;
+      margin-bottom: 5px;
+    }
+    .controls {
+        margin: auto;
+        display: flex;
+        justify-content: center;
+        padding: 10px;
+        gap: 10px;
+    }
+    .search-input {
+      padding: 10px;
+      font-size: 16px;
+      border: 2px solid #3498db;
+      border-radius: 4px;
+      width: 80px;
+      text-align: center;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #2980b9;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+    button:hover {
+      background-color: #3498db;
+    }
+    button:disabled {
+      background-color: #95a5a6;
+      cursor: not-allowed;
+    }
+    .instructions {
+      margin-top: 50px;
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-align: center;
+      max-width: 800px;
+    }
+    .pseudocode {
+      width: 300px;
+      margin-left: 60px;
+      background-color: transparent;
+      border-radius: 8px;
+      font-family: monospace;
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      height: 350px;
+    }
+    .pseudocode pre {
+      margin: 0;
+      white-space: pre-wrap;
+    }
+    .highlight {
+      background-color: #ffeb3b;
+      font-weight: bold;
+      display: inline;
+    }
+    .left-bound {
+      background-color: #f39c12 !important;
+    }
+    .right-bound {
+      background-color: #f39c12 !important;
+    }
+    .middle {
+      background-color: #9b59b6 !important;
+    }
+    .found {
+      background-color: #2ecc71 !important;
+    }
+    .eliminated {
+      background-color: #95a5a6 !important;
+    }
+    .search-space {
+      background-color: #3498db !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <input type="number" id="searchInput" class="search-input" placeholder="Target" min="1" max="100">
+    <button id="startButton">Start Search</button>
+    <button id="nextButton" disabled>Next Step</button>
+    <button id="resetButton">Reset</button>
+    <button id="autoPlayButton" disabled>Auto Play</button>
+  </div>
+  <div class="main-container">
+    <div class="array-container" id="arrayContainer">
+      <div class="target-display" id="targetDisplay" style="display: none;">
+        Target: <span id="targetValue">0</span>
+      </div>
+    </div>
+    <div class="pseudocode" id="pseudocode">
+      <pre id="pseudocodeText">
+
+function binarySearch(array, target):
+  left = 0
+  right = array.length - 1
+  
+  while (left <= right)
+    middle = (left + right) / 2
+    
+    if array[middle] == target
+      return middle
+    else if array[middle] < target
+      left = middle + 1
+    else
+      right = middle - 1
+  
+  return -1  // not found
+end function</pre>
+    </div>
+  </div>
+  <div class="instructions" id="instructions"></div>
+
+  <script>
+    // Initialize the array and DOM elements
+    let array = [];
+    const arrayContainer = document.getElementById('arrayContainer');
+    const searchInput = document.getElementById('searchInput');
+    const startButton = document.getElementById('startButton');
+    const nextButton = document.getElementById('nextButton');
+    const resetButton = document.getElementById('resetButton');
+    const autoPlayButton = document.getElementById('autoPlayButton');
+    const instructions = document.getElementById('instructions');
+    const pseudocodeText = document.getElementById('pseudocodeText');
+    const targetDisplay = document.getElementById('targetDisplay');
+    const targetValue = document.getElementById('targetValue');
+    const n = 10; // Length of the array
+    let autoplaySpeed = 1500;
+
+    // Binary search state
+    let left = 0;
+    let right = 0;
+    let middle = 0;
+    let target = 0;
+    let autoPlayInterval = null;
+    let phase = 'idle';
+    let searchActive = false;
+    let foundIndex = -1;
+
+    // Pseudocode lines for different phases
+    const pseudocodeLines = {
+      idle: [2],
+      initialize: [3, 4],
+      whileLoop: [6],
+      calculateMiddle: [7],
+      checkEqual: [9, 10],
+      checkLess: [11, 12],
+      checkGreater: [13, 14],
+      notFound: [16],
+      found: [10]
+    };
+
+    // Generate a sorted array
+    function generateArray() {
+      array = Array.from({ length:  n}, () => Math.floor(Math.random() * 90) + 10);
+      array.sort((a, b) => a - b);
+      resetState();
+      renderArray();
+      updateInstructions("Enter a target value and click 'Start Search' to begin binary search.");
+      highlightPseudocode('idle');
+    }
+
+    // Render the array as bars with numbers and indices
+    function renderArray() {
+      arrayContainer.innerHTML = '';
+      
+      // Add target display
+      const targetDiv = document.createElement('div');
+      targetDiv.className = 'target-display';
+      targetDiv.id = 'targetDisplay';
+      targetDiv.style.display = searchActive ? 'block' : 'none';
+      targetDiv.innerHTML = `Target: <span id="targetValue">${target}</span>`;
+      arrayContainer.appendChild(targetDiv);
+      
+      array.forEach((value, index) => {
+        const bar = document.createElement('div');
+        bar.classList.add('array-bar');
+        bar.style.height = `${Math.max(value * 2.5)}px`;
+        
+        const valueLabel = document.createElement('div');
+        valueLabel.className = 'value';
+        valueLabel.textContent = value;
+        bar.appendChild(valueLabel);
+        
+        const indexLabel = document.createElement('div');
+        indexLabel.className = 'index';
+        indexLabel.textContent = index;
+        bar.appendChild(indexLabel);
+        
+        // Apply styling based on current search state
+        if (!searchActive) {
+          bar.classList.add('search-space');
+        } else if (foundIndex === index) {
+          bar.classList.add('found');
+        } else if (index < left || index > right) {
+          bar.classList.add('eliminated');
+        } else if (index === left && index === right) {
+          bar.classList.add('middle');
+        } else if (index === left) {
+          bar.classList.add('left-bound');
+        } else if (index === right) {
+          bar.classList.add('right-bound');
+        } else if (index === middle) {
+          bar.classList.add('middle');
+        } else {
+          bar.classList.add('search-space');
+        }
+        
+        arrayContainer.appendChild(bar);
+      });
+    }
+
+    // Reset the search state
+    function resetState() {
+      left = 0;
+      right = array.length - 1;
+      middle = 0;
+      target = 0;
+      phase = 'idle';
+      searchActive = false;
+      foundIndex = -1;
+      stopAutoPlay();
+      
+      // Reset button states
+      startButton.disabled = false;
+      nextButton.disabled = true;
+      autoPlayButton.disabled = true;
+      searchInput.disabled = false;
+    }
+
+    // Update the instructions
+    function updateInstructions(text) {
+      instructions.innerHTML = text.replace(/\n/g, '<br>');
+    }
+
+    // Highlight the current step in the pseudocode
+    function highlightPseudocode(currentPhase) {
+      const lines = pseudocodeText.textContent.split('\n');
+      const highlightedLines = [];
+
+      lines.forEach((line, index) => {
+        const lineNumber = index + 1;
+        if (pseudocodeLines[currentPhase] && pseudocodeLines[currentPhase].includes(lineNumber)) {
+          const indentation = line.match(/^\s*/)[0];
+          const codeText = line.substring(indentation.length);
+          highlightedLines.push(`${indentation}<span class="highlight">${codeText}</span>`);
+        } else {
+          highlightedLines.push(line);
+        }
+      });
+
+      pseudocodeText.innerHTML = highlightedLines.join('\n');
+    }
+
+    // Start a new search
+    function startSearch() {
+      const inputValue = parseInt(searchInput.value);
+      if (isNaN(inputValue)) {
+        alert('Please enter a valid number');
+        return;
+      }
+      
+      target = inputValue;
+      left = 0;
+      right = array.length - 1;
+      phase = 'initialize';
+      searchActive = true;
+      foundIndex = -1;
+      
+      // Update button states
+      startButton.disabled = true;
+      nextButton.disabled = false;
+      autoPlayButton.disabled = false;
+      searchInput.disabled = true;
+      
+      updateInstructions(`Starting binary search for target: ${target}\nInitializing left = 0, right = ${right}`);
+      highlightPseudocode('initialize');
+      renderArray();
+    }
+
+    // Perform one step of the binary search
+    function binarySearchStep() {
+      if (phase === 'initialize') {
+        updateInstructions(`Left index = ${left}, Right index = ${right}\nChecking if left <= right`);
+        phase = 'whileLoop';
+        highlightPseudocode('whileLoop');
+        return true;
+      }
+
+      if (phase === 'whileLoop') {
+        if (left <= right) {
+          middle = Math.floor((left + right) / 2);
+          updateInstructions(`Calculate middle: (${left} + ${right}) / 2 = ${middle}\nMiddle element is array[${middle}] = ${array[middle]}`);
+          phase = 'calculateMiddle';
+          highlightPseudocode('calculateMiddle');
+          renderArray();
+          return true;
+        } else {
+          updateInstructions(`Left (${left}) > Right (${right}), search space exhausted.\nTarget ${target} not found in array.`);
+          phase = 'notFound';
+          highlightPseudocode('notFound');
+          endSearch();
+          return false;
+        }
+      }
+
+      if (phase === 'calculateMiddle') {
+        if (array[middle] === target) {
+          foundIndex = middle;
+          updateInstructions(`Found! array[${middle}] = ${array[middle]} equals target ${target}\nTarget found at index ${middle}`);
+          phase = 'found';
+          highlightPseudocode('checkEqual');
+          renderArray();
+          endSearch();
+          return false;
+        } else {
+          updateInstructions(`array[${middle}] = ${array[middle]} ${array[middle] === target ? '==' : (array[middle] < target ? '<' : '>')} Target: ${target}`);
+          phase = 'checkEqual';
+          highlightPseudocode('checkEqual');
+          return true;
+        }
+      }
+
+      if (phase === 'checkEqual') {
+        if (array[middle] < target) {
+          left = middle + 1;
+          updateInstructions(`${array[middle]} < ${target}, so target must be in right half\nUpdate left: Left = middle + 1 = ${left}`);
+          highlightPseudocode('checkLess');
+          phase = 'whileLoop';
+        } else {
+          right = middle - 1;
+          updateInstructions(`${array[middle]} > ${target}, so target must be in left half\nUpdate right: Right = middle - 1 = ${right}`);
+          highlightPseudocode('checkGreater');
+          phase = 'whileLoop';
+        }
+        renderArray();
+        return true;
+      }
+
+      return false;
+    }
+
+    // End the search
+    function endSearch() {
+      nextButton.disabled = true;
+      autoPlayButton.disabled = true;
+      stopAutoPlay();
+    }
+
+    // Auto-play functionality
+    function startAutoPlay() {
+      if (autoPlayInterval === null) {
+        autoPlayButton.textContent = "Stop Auto";
+        autoPlayInterval = setInterval(() => {
+          const continueSearch = binarySearchStep();
+          if (!continueSearch) {
+            stopAutoPlay();
+          }
+        }, autoplaySpeed);
+      }
+    }
+
+    function stopAutoPlay() {
+      if (autoPlayInterval !== null) {
+        clearInterval(autoPlayInterval);
+        autoPlayInterval = null;
+        autoPlayButton.textContent = "Auto Play";
+      }
+    }
+
+    // Event listeners
+    startButton.addEventListener('click', startSearch);
+
+    nextButton.addEventListener('click', () => {
+      stopAutoPlay();
+      binarySearchStep();
+    });
+
+    resetButton.addEventListener('click', () => {
+      generateArray();
+    });
+
+    autoPlayButton.addEventListener('click', () => {
+      if (autoPlayInterval === null) {
+        startAutoPlay();
+      } else {
+        stopAutoPlay();
+      }
+    });
+
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && !startButton.disabled) {
+        startSearch();
+      }
+    });
+
+    // Initialize
+    generateArray();
+  </script>
+</body>
+</html>

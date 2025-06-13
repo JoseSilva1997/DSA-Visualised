@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bubble Sort Mini Animation</title>
+  <style>
+    .mini-animation-container {
+      width: 100%;
+      max-width: 800px;
+      height: 250px;
+      margin: 0 auto;
+      padding: 20px;
+      box-sizing: border-box;
+      overflow: visible;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, sans-serif;
+    }
+    
+    .animation-title {
+      text-align: center;
+      margin-bottom: 15px;
+      color: #2c3e50;
+      font-weight: bold;
+    }
+    
+    .array-container {
+      display: flex;
+      align-items: flex-end;
+      height: 150px;
+      justify-content: center;
+      width: 100%;
+    }
+    
+    .array-bar {
+      width: 40px;
+      margin: 0 5px;
+      background-color: #3498db;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      color: white;
+      font-weight: bold;
+      border-radius: 3px 3px 0 0;
+      transition: height 0.3s, background-color 0.3s;
+    }
+    
+    .array-bar span {
+      padding: 5px;
+      font-size: 14px;
+    }
+    
+    .comparison {
+      background-color: #e74c3c;
+    }
+    
+    .sorted {
+      background-color: #2ecc71;
+    }
+  </style>
+</head>
+<body>
+  <div class="mini-animation-container">
+    <div class="animation-title">Bubble Sort Visualisation</div>
+    <div class="array-container" id="arrayContainer"></div>
+  </div>
+
+  <script>
+    // Initialize the array and DOM elements
+    let array = [65, 42, 38, 25, 22, 90, 57];
+    const arrayContainer = document.getElementById('arrayContainer');
+    const originalArray = [...array]; // Keep a copy of the original array
+
+    // Bubble sort state
+    let i = 0;
+    let n = array.length;
+    let swapped = false;
+    let sortedIndices = [];
+    let animationSpeed = 100; // milliseconds
+    let animationTimeout;
+    let phase = 'compare'; // 'compare', 'swap', 'reset'
+
+    // Render the array as bars with numbers
+    function renderArray() {
+      arrayContainer.innerHTML = '';
+      array.forEach((value, index) => {
+        const bar = document.createElement('div');
+        bar.classList.add('array-bar');
+        bar.style.height = `${value}px`;
+        
+        const valueLabel = document.createElement('span');
+        valueLabel.textContent = value;
+        bar.appendChild(valueLabel);
+        
+        // Apply different styles based on the sorting state
+        if (sortedIndices.includes(index)) {
+          bar.classList.add('sorted');
+        }
+        if (phase === 'compare' && (index === i || index === i + 1)) {
+          bar.classList.add('comparison');
+        }
+        
+        arrayContainer.appendChild(bar);
+      });
+    }
+
+    // Reset to original array
+    function resetArray() {
+      array = [...originalArray];
+      i = 0;
+      n = array.length;
+      swapped = false;
+      sortedIndices = [];
+      phase = 'compare';
+      renderArray();
+    }
+
+    // Perform one step of the bubble sort
+    function bubbleSortStep() {
+      // Reset if we're done
+      if (n <= 1 && !swapped) {
+        // Mark all elements as sorted for visual effect
+        sortedIndices = Array.from({ length: array.length }, (_, i) => i);
+        renderArray();
+        
+        // Schedule reset after a pause to admire the sorted array
+        setTimeout(() => {
+          resetArray();
+          runAnimation();
+        }, 500);
+        return;
+      }
+
+      if (phase === 'compare') {
+        // Compare and potentially prepare for swap
+        if (i < n - 1) {
+          renderArray(); // Show the comparison
+          
+          // Schedule swap or next comparison
+          if (array[i] > array[i + 1]) {
+            phase = 'swap';
+          } else {
+            i++;
+            // If we reach the end of a pass
+            if (i >= n - 1) {
+              n--;
+              sortedIndices.push(n);
+              i = 0;
+              
+              // If no swaps in this pass, we're done
+              if (!swapped) {
+                n = 0; // Will trigger reset on next step
+              } else {
+                swapped = false; // Reset for the next pass
+              }
+            }
+          }
+        }
+      } else if (phase === 'swap') {
+        // Perform swap
+        [array[i], array[i + 1]] = [array[i + 1], array[i]];
+        swapped = true;
+        i++;
+        phase = 'compare';
+        
+        // If we reach the end of a pass
+        if (i >= n - 1) {
+          n--;
+          sortedIndices.push(n);
+          i = 0;
+          
+          // If no more passes needed, we're done
+          if (n <= 1) {
+            n = 0; // Will trigger reset on next step
+          } else {
+            swapped = false; // Reset for the next pass
+          }
+        }
+      }
+      
+      renderArray();
+      
+      // Schedule next step
+      animationTimeout = setTimeout(bubbleSortStep, animationSpeed);
+    }
+
+    // Start the animation loop
+    function runAnimation() {
+      if (animationTimeout) {
+        clearTimeout(animationTimeout);
+      }
+      bubbleSortStep();
+    }
+
+    // Initialize the animation
+    renderArray();
+    runAnimation();
+  </script>
+</body>
+</html>

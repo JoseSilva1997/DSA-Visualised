@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linked List Animation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 20px;
+      background-color: #f5f7fa;
+    }
+    .linked-list-container {
+      position: relative;
+      height: 200px;
+      width: 100%;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center; /* Center the list horizontally */
+      overflow-x: auto;
+      padding: 20px 0;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .node {
+      display: flex;
+      margin-right: 30px;
+      position: relative;
+      transition: all 0.5s ease;
+    }
+    .data-box {
+      width: 50px;
+      height: 50px;
+      background-color: #3498db;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 4px 0 0 4px;
+      font-weight: bold;
+      border: 2px solid #2980b9;
+      font-size: 16px;
+    }
+    .pointer-box {
+      width: 50px;
+      height: 50px;
+      background-color: #f8f9fa;
+      border: 2px solid #2980b9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 0 4px 4px 0;
+      position: relative;
+    }
+    .arrow {
+      position: absolute;
+      top: 50%;
+      right: -30px;
+      width: 30px;
+      height: 10px;
+      background-color: transparent;
+      transform: translateY(-50%);
+    }
+    .arrow::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 0;
+      height: 0;
+      border-top: 5px solid transparent;
+      border-left: 8px solid #2980b9;
+      border-bottom: 5px solid transparent;
+    }
+    .arrow-line {
+      position: absolute;
+      top: 50%;
+      right: 8px;
+      width: 22px;
+      height: 2px;
+      background-color: #2980b9;
+      transform: translateY(-50%);
+    }
+    .null-pointer {
+      font-weight: bold;
+      color: #e74c3c;
+    }
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 15px;
+      width: 100%;
+      max-width: 600px;
+    }
+    .tab-btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #f8f9fa;
+      color: #2c3e50;
+      border: 1px solid #ddd;
+      border-bottom: none;
+      border-radius: 4px 4px 0 0;
+      cursor: pointer;
+      margin: 0 5px;
+      transition: all 0.3s ease;
+    }
+    .tab-btn:hover {
+      background-color: #e9ecef;
+    }
+    .tab-btn.active {
+      background-color: #2980b9;
+      color: white;
+      border-color: #2980b9;
+    }
+    .tab-content {
+      display: none;
+      padding: 15px;
+      border-radius: 0 0 4px 4px;
+      background-color: #f8f9fa;
+      border: 1px solid #ddd;
+      width: 100%;
+      justify-content: center;
+    }
+    .tab-content.active {
+      display: flex;
+      gap: 10px;
+    }
+    .controls {
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 600px;
+    }
+    #resetBtn {
+      margin-top: 10px;
+      background-color: #e74c3c;
+      transition: background-color 0.3s ease;
+    }
+    #resetBtn:hover {
+      background-color: #c0392b;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 14px;
+      cursor: pointer;
+      background-color: #2980b9;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #3498db;
+    }
+    input {
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 60px;
+      text-align: center;
+    }
+    .highlight {
+      background-color: #e74c3c;
+    }
+    .instructions {
+      margin-top: 20px;
+      font-size: 16px;
+      width: 100%;
+      max-width: 800px;
+      text-align: center;
+      min-height: 48px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      color: #2c3e50;
+    }
+    .head-label, .tail-label {
+      position: absolute;
+      font-weight: bold;
+      color: #2c3e50;
+      top: -25px;
+      font-size: 14px;
+      background-color: #f8f9fa;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+    /* Center the linked list visually */
+    .list-wrapper {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+    }
+    .main-container {
+      display: flex;
+      width: 100%;
+      max-width: 1000px;
+      justify-content: center;
+      overflow-x: auto;
+    }
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="tabs">
+    <button class="tab-btn active" id="insertTab">Insert</button>
+    <button class="tab-btn" id="deleteTab">Delete</button>
+    <button class="tab-btn" id="searchTab">Search</button>
+  </div>
+  
+  <div class="controls">
+    <div class="tab-content active" id="insertContent">
+      <button id="insertHeadBtn">Insert at Head</button>
+      <button id="insertTailBtn">Insert at Tail</button>
+      <button id="insertAtBtn">Insert at Index</button>
+      <input type="number" id="insertAtIndex" min="0" value="1">
+    </div>
+    
+    <div class="tab-content" id="deleteContent">
+      <button id="deleteHeadBtn">Delete from Head</button>
+      <button id="deleteTailBtn">Delete from Tail</button>
+      <button id="deleteAtBtn">Delete at Index</button>
+      <input type="number" id="deleteAtIndex" min="0" value="1">
+    </div>
+    
+    <div class="tab-content" id="searchContent">
+      <button id="searchBtn">Search Value</button>
+      <input type="number" id="searchValue" min="1" value="42">
+    </div>
+    
+    <button id="resetBtn">Reset List</button>
+  </div>
+  
+  <div class="list-wrapper">
+    <div class="main-container">
+      <div class="linked-list-container" id="linkedListContainer">
+        <!-- Linked list will be rendered here -->
+      </div>
+    </div>
+  </div>
+  
+  <div class="instructions" id="instructions">
+    Select an operation to begin.
+  </div>
+
+  <script>
+    // DOM elements
+    const linkedListContainer = document.getElementById('linkedListContainer');
+    const instructions = document.getElementById('instructions');
+    
+    // Input fields
+    const insertAtIndexInput = document.getElementById('insertAtIndex');
+    const deleteAtIndexInput = document.getElementById('deleteAtIndex');
+    const searchValueInput = document.getElementById('searchValue');
+    
+    // Tab elements
+    const insertTab = document.getElementById('insertTab');
+    const deleteTab = document.getElementById('deleteTab');
+    const searchTab = document.getElementById('searchTab');
+    const insertContent = document.getElementById('insertContent');
+    const deleteContent = document.getElementById('deleteContent');
+    const searchContent = document.getElementById('searchContent');
+    
+    // Buttons
+    const insertHeadBtn = document.getElementById('insertHeadBtn');
+    const insertTailBtn = document.getElementById('insertTailBtn');
+    const insertAtBtn = document.getElementById('insertAtBtn');
+    const deleteHeadBtn = document.getElementById('deleteHeadBtn');
+    const deleteTailBtn = document.getElementById('deleteTailBtn');
+    const deleteAtBtn = document.getElementById('deleteAtBtn');
+    const searchBtn = document.getElementById('searchBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    
+    // Linked list state
+    let linkedList = [];
+    let animationInProgress = false;
+
+    // Animation speed
+    const animationSpeed = 2000; // in milliseconds
+    const traversalSpeed = 750; // in milliseconds
+    
+    // Initialize the linked list with some nodes
+    function initializeLinkedList() {
+      linkedList = [
+        { data: 15, next: 1 },
+        { data: 42, next: 2 },
+        { data: 27, next: 3 },
+        { data: 33, next: null }
+      ];
+      renderLinkedList();
+      showInstructions("Linked list initialized. Select an operation.");
+    }
+    
+    // Show instructions for the user
+    function showInstructions(text) {
+      instructions.textContent = text;
+    }
+    
+    // Generate a random number for new nodes
+    function getRandomNumber() {
+      return Math.floor(Math.random() * 90) + 10;
+    }
+    
+    // Render the linked list in the container
+    function renderLinkedList() {
+      linkedListContainer.innerHTML = '';
+      
+      // Create a wrapper for the nodes that's centered
+      const nodesWrapper = document.createElement('div');
+      nodesWrapper.style.display = 'flex';
+      nodesWrapper.style.justifyContent = 'center';
+      nodesWrapper.style.alignItems = 'center';
+      
+      for (let i = 0; i < linkedList.length; i++) {
+        const node = linkedList[i];
+        const nodeElement = document.createElement('div');
+        nodeElement.classList.add('node');
+        nodeElement.id = `node-${i}`;
+        
+        // Data box
+        const dataBox = document.createElement('div');
+        dataBox.classList.add('data-box');
+        dataBox.textContent = node.data;
+        nodeElement.appendChild(dataBox);
+        
+        // Pointer box
+        const pointerBox = document.createElement('div');
+        pointerBox.classList.add('pointer-box');
+        if (node.next !== null) {
+          pointerBox.innerHTML = '&rarr;';
+          
+          // Add arrow
+          const arrow = document.createElement('div');
+          arrow.classList.add('arrow');
+          const arrowLine = document.createElement('div');
+          arrowLine.classList.add('arrow-line');
+          arrow.appendChild(arrowLine);
+          nodeElement.appendChild(arrow);
+        } else {
+          pointerBox.innerHTML = '<span class="null-pointer">null</span>';
+        }
+        nodeElement.appendChild(pointerBox);
+        
+        nodesWrapper.appendChild(nodeElement);
+        
+        // Add head and tail labels
+        if (i === 0) {
+          const headLabel = document.createElement('div');
+          headLabel.classList.add('head-label');
+          headLabel.textContent = 'Head';
+          nodeElement.appendChild(headLabel);
+        }
+        
+        if (node.next === null) {
+          const tailLabel = document.createElement('div');
+          tailLabel.classList.add('tail-label');
+          tailLabel.textContent = 'Tail';
+          nodeElement.appendChild(tailLabel);
+        }
+      }
+      
+      linkedListContainer.appendChild(nodesWrapper);
+      
+      // Add "Empty List" message if there are no nodes
+      if (linkedList.length === 0) {
+        const emptyMessage = document.createElement('div');
+        emptyMessage.textContent = 'Empty List';
+        emptyMessage.style.color = '#2c3e50';
+        emptyMessage.style.fontWeight = 'bold';
+        emptyMessage.style.fontSize = '16px';
+        linkedListContainer.appendChild(emptyMessage);
+      }
+    }
+    
+    // Highlight a node during animation
+    function highlightNode(index, highlight = true) {
+      const nodeElement = document.getElementById(`node-${index}`);
+      if (nodeElement) {
+        if (highlight) {
+          nodeElement.querySelector('.data-box').classList.add('highlight');
+        } else {
+          nodeElement.querySelector('.data-box').classList.remove('highlight');
+        }
+      }
+    }
+    
+    // Reset all node highlights
+    function resetHighlights() {
+      const dataBoxes = document.querySelectorAll('.data-box');
+      dataBoxes.forEach(box => box.classList.remove('highlight'));
+    }
+    
+    // Insert at head operation
+    async function insertAtHead() {
+      if (animationInProgress) return;
+      animationInProgress = true;
+      
+      const newData = getRandomNumber();
+      showInstructions(`Creating a new node with data ${newData}`);
+      await delay(animationSpeed);
+      
+      if (linkedList.length === 0) {
+        showInstructions(`List is empty. The new node becomes both head and tail.`);
+        await delay(animationSpeed);
+        linkedList.push({ data: newData, next: null });
+      } else {
+        showInstructions(`Setting the new node's 'next' pointer to the current head`);
+        await delay(animationSpeed);
+        linkedList.unshift({ data: newData, next: 0 });
+        
+        // Update the next pointers
+        for (let i = 1; i < linkedList.length; i++) {
+          if (linkedList[i].next !== null) {
+            linkedList[i].next++;
+          }
+        }
+        showInstructions(`Updating the head to point to the new node`);
+        await delay(animationSpeed);
+      }
+      
+      renderLinkedList();
+      highlightNode(0);
+      showInstructions(`New node with data ${newData} inserted at the head`);
+      await delay(animationSpeed);
+      resetHighlights();
+      
+      animationInProgress = false;
+    }
+    
+    // Insert at tail operation
+    async function insertAtTail() {
+      if (animationInProgress) return;
+      animationInProgress = true;
+      
+      const newData = getRandomNumber();
+      showInstructions(`Creating a new node with data ${newData}`);
+      await delay(animationSpeed);
+      
+      if (linkedList.length === 0) {
+        showInstructions(`List is empty. The new node becomes both head and tail.`);
+        await delay(animationSpeed);
+        linkedList.push({ data: newData, next: null });
+      } else {
+        const oldTailIndex = linkedList.length - 1;
+        showInstructions(`Setting the current tail's 'next' pointer to the new node`);
+        await delay(animationSpeed);
+        
+        // Update old tail's next pointer
+        linkedList[oldTailIndex].next = linkedList.length;
+        
+        // Add new node at the end
+        linkedList.push({ data: newData, next: null });
+        
+        showInstructions(`Updating the tail reference to the new node`);
+        await delay(animationSpeed);
+      }
+      
+      renderLinkedList();
+      highlightNode(linkedList.length - 1);
+      showInstructions(`New node with data ${newData} inserted at the tail`);
+      await delay(animationSpeed);
+      resetHighlights();
+      
+      animationInProgress = false;
+    }
+    
+    // Insert at specific index operation
+    async function insertAtIndex() {
+      if (animationInProgress) return;
+      animationInProgress = true;
+      
+      const index = parseInt(insertAtIndexInput.value);
+      
+      if (index < 0) {
+        showInstructions("Invalid index: must be positive");
+        animationInProgress = false;
+        return;
+      }
+      
+      if (index === 0) {
+        await insertAtHead();
+        animationInProgress = false;
+        return;
+      }
+      
+      if (index >= linkedList.length) {
+        showInstructions(`Index ${index} is out of bounds. The list only has ${linkedList.length} elements.`);
+        animationInProgress = false;
+        return;
+      }
+      
+      const newData = getRandomNumber();
+      showInstructions(`Creating a new node with data ${newData}`);
+      await delay(animationSpeed);
+      
+      showInstructions(`Traversing to position ${index - 1}`);
+      for (let i = 0; i < index; i++) {
+        highlightNode(i);
+        await delay(traversalSpeed);
+        if (i > 0) highlightNode(i - 1, false);
+      }
+      
+      showInstructions(`Setting the new node's 'next' pointer to node at index ${index}`);
+      await delay(animationSpeed);
+      
+      showInstructions(`Setting node at index ${index - 1}'s 'next' pointer to the new node`);
+      await delay(animationSpeed);
+      
+      // Insert the new node
+      linkedList.splice(index, 0, { data: newData, next: index + 1 });
+      
+      // Update next pointers for all nodes
+      for (let i = 0; i < linkedList.length; i++) {
+        if (i !== index && linkedList[i].next !== null && linkedList[i].next >= index) {
+          linkedList[i].next++;
+        }
+      }
+      
+      renderLinkedList();
+      highlightNode(index);
+      showInstructions(`New node with data ${newData} inserted at index ${index}`);
+      await delay(animationSpeed);
+      resetHighlights();
+      
+      animationInProgress = false;
+    }
+    
+    // Delete from head operation
+    async function deleteFromHead() {
+      if (animationInProgress) return;
+      animationInProgress = true;
+      
+      if (linkedList.length === 0) {
+        showInstructions("List is empty. Nothing to delete.");
+        animationInProgress = false;
+        return;
+      }
+      
+      const deletedData = linkedList[0].data;
+      highlightNode(0);
+      showInstructions(`Removing node with data ${deletedData} from the head`);
+      await delay(animationSpeed);
+      
+      if (linkedList.length === 1) {
+        showInstructions("Head is the only node. Setting both head and tail to null.");
+        await delay(animationSpeed);
+        linkedList = [];
+      } else {
+        showInstructions("Setting the head to point to the next node");
+        await delay(animationSpeed);
+        linkedList.shift();
+        
+        // Update next pointers for all remaining nodes
+        for (let i = 0; i < linkedList.length; i++) {
+          if (linkedList[i].next !== null) {
+            linkedList[i].next--;
+          }
+        }
+      }
+      
+      renderLinkedList();
+      if (linkedList.length > 0) {
+        highlightNode(0);
+      }
+      showInstructions(`Node with data ${deletedData} removed from the head`);
+      await delay(animationSpeed);
+      resetHighlights();
+      
+      animationInProgress = false;
+    }
+    
+    // Delete from tail operation
+    async function deleteFromTail() {
+      if (animationInProgress) return;
+      animationInProgress = true;
+      
+      if (linkedList.length === 0) {
+        showInstructions("List is empty. Nothing to delete.");
+        animationInProgress = false;
+        return;
+      }
+      
+      const tailIndex = linkedList.length - 1;
+      const deletedData = linkedList[tailIndex].data;
+      highlightNode(tailIndex);
+      showInstructions(`Removing node with data ${deletedData} from the tail`);
+      await delay(animationSpeed);
+      
+      if (linkedList.length === 1) {
+        showInstructions("Tail is the only node. Setting both head and tail to null.");
+        await delay(animationSpeed);
+        linkedList = [];
+      } else {
+        showInstructions("Traversing to find the node before tail");
+        for (let i = 0; i < tailIndex; i++) {
+          highlightNode(i);
+          if (i > 0) highlightNode(i - 1, false);
+          await delay(traversalSpeed);
+        }
+        
+        const newTailIndex = tailIndex - 1;
+        highlightNode(newTailIndex, false);
+        showInstructions(`Setting the new tail's 'next' pointer to null`);
+        await delay(animationSpeed);
+        highlightNode(newTailIndex);
+        // Set the new tail's next to null
+        linkedList[newTailIndex].next = null;
+        
+        // Remove the old tail
+        linkedList.pop();
+      }
+      
+      renderLinkedList();
+      if (linkedList.length > 0) {
+        highlightNode(linkedList.length - 1);
+      }
+      showInstructions(`Node with data ${deletedData} removed from the tail`);
+      await delay(animationSpeed);
+      resetHighlights();
+      
+      animationInProgress = false;
+    }
+    
+    // Delete at specific index operation
+    async function deleteAtIndex() {
+      if (animationInProgress) return;
+      animationInProgress = true;
+      
+      const index = parseInt(deleteAtIndexInput.value);
+      
+      if (index < 0 || linkedList.length === 0) {
+        showInstructions("Invalid index or empty list");
+        animationInProgress = false;
+        return;
+      }
+      
+      if (index >= linkedList.length) {
+        showInstructions(`Index ${index} is out of bounds. The list only has ${linkedList.length} elements.`);
+        animationInProgress = false;
+        return;
+      }
+      
+      if (index === 0) {
+        await deleteFromHead();
+        animationInProgress = false;
+        return;
+      }
+      
+      if (index === linkedList.length - 1) {
+        await deleteFromTail();
+        animationInProgress = false;
+        return;
+      }
+      
+      const deletedData = linkedList[index].data;
+      
+      showInstructions(`Traversing to position ${index - 1}`);
+      for (let i = 0; i < index; i++) {
+        highlightNode(i);
+        await delay(traversalSpeed);
+        if (i > 0) highlightNode(i - 1, false);
+      }
+      
+      highlightNode(index);
+      showInstructions(`Removing node with data ${deletedData} at index ${index}`);
+      await delay(animationSpeed);
+      
+      showInstructions(`Setting node at index ${index - 1}'s 'next' pointer to node at index ${index + 1}`);
+      await delay(animationSpeed);
+      
+      // Update the previous node's next pointer
+      if (linkedList[index - 1].next === index) {
+        linkedList[index - 1].next = index + 1;
+        if (index + 1 >= linkedList.length) {
+          linkedList[index - 1].next = null;
+        }
+      }
+      
+      // Remove the node
+      linkedList.splice(index, 1);
+      
+      // Update next pointers for all nodes
+      for (let i = 0; i < linkedList.length; i++) {
+        if (linkedList[i].next !== null && linkedList[i].next > index) {
+          linkedList[i].next--;
+        }
+      }
+      
+      renderLinkedList();
+      highlightNode(index - 1);
+      showInstructions(`Node with data ${deletedData} removed from index ${index}`);
+      await delay(animationSpeed);
+      resetHighlights();
+      
+      animationInProgress = false;
+    }
+    
+    // Search for a value in the linked list
+    async function searchValue() {
+      if (animationInProgress) return;
+      animationInProgress = true;
+      
+      const searchVal = parseInt(searchValueInput.value);
+      
+      if (linkedList.length === 0) {
+        showInstructions("List is empty. Nothing to search.");
+        animationInProgress = false;
+        return;
+      }
+      
+      showInstructions(`Searching for value ${searchVal} in the linked list`);
+      await delay(animationSpeed);
+      
+      let found = false;
+      for (let i = 0; i < linkedList.length; i++) {
+        highlightNode(i);
+        showInstructions(`Checking node at index ${i} with value ${linkedList[i].data}`);
+        await delay(animationSpeed);
+        
+        if (linkedList[i].data === searchVal) {
+          showInstructions(`Value ${searchVal} found at index ${i}!`);
+          await delay(animationSpeed);
+          found = true;
+          break;
+        }
+        
+        highlightNode(i, false);
+      }
+      
+      if (!found) {
+        showInstructions(`Value ${searchVal} not found in the linked list`);
+      }
+      
+      await delay(animationSpeed);
+      resetHighlights();
+      animationInProgress = false;
+    }
+    
+    // Reset the linked list to initial state
+    function resetList() {
+      resetHighlights();
+      initializeLinkedList();
+    }
+    
+    // Helper function for delay in animations
+    function delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    // Tab functionality
+    function openTab(evt, tabName) {
+      // Hide all tab content
+      const tabContents = document.getElementsByClassName('tab-content');
+      for (let i = 0; i < tabContents.length; i++) {
+        tabContents[i].classList.remove('active');
+      }
+      
+      // Remove active class from all tab buttons
+      const tabButtons = document.getElementsByClassName('tab-btn');
+      for (let i = 0; i < tabButtons.length; i++) {
+        tabButtons[i].classList.remove('active');
+      }
+      
+      // Show the selected tab content and mark the button as active
+      document.getElementById(tabName + 'Content').classList.add('active');
+      evt.currentTarget.classList.add('active');
+    }
+    
+    // Event Listeners for tabs
+    insertTab.addEventListener('click', function(evt) {
+      openTab(evt, 'insert');
+    });
+    
+    deleteTab.addEventListener('click', function(evt) {
+      openTab(evt, 'delete');
+    });
+    
+    searchTab.addEventListener('click', function(evt) {
+      openTab(evt, 'search');
+    });
+    
+    // Event Listeners for operations
+    insertHeadBtn.addEventListener('click', insertAtHead);
+    insertTailBtn.addEventListener('click', insertAtTail);
+    insertAtBtn.addEventListener('click', insertAtIndex);
+    deleteHeadBtn.addEventListener('click', deleteFromHead);
+    deleteTailBtn.addEventListener('click', deleteFromTail);
+    deleteAtBtn.addEventListener('click', deleteAtIndex);
+    searchBtn.addEventListener('click', searchValue);
+    resetBtn.addEventListener('click', resetList);
+    
+    // Initialize
+    initializeLinkedList();
+    
+    // Set first tab as active by default
+    insertTab.click();
+  </script>
+</body>
+</html>

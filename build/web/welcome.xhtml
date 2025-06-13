@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/XHtml.xhtml to edit this template
+-->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    
+    <h:body>
+        <h:panelGroup styleClass="welcome-container" layout="block">
+            <h:outputText styleClass="title-style-class" value="Welcome to DSA Visualised"/>
+        </h:panelGroup>
+        <br/>
+        <h:panelGroup styleClass="grid-container">
+            <h:outputText value="This website is dedicated to helping 
+                      you understand data structures and algorithms through comprehensive explanations 
+                      and interactive visualisations."/>
+            <br/>
+            <h:outputText value=" Whether you're a computer science student, preparing for technical interviews, 
+                          or simply curious about how algorithms work, our platform offers clear explanations alongside 
+                          interactive animations that bring these concepts to life."/> 
+        </h:panelGroup>
+        <!-- Insert .html resource (interactive animation) into the page. -->
+        <h:panelGroup layout="block">
+            <iframe src="#{request.contextPath}/resources/animations/welcome-page-animation.html" width="100%" onload="this.height=this.contentWindow.document.body.scrollHeight + 20;" frameborder="0" marginwidth="20px"></iframe>
+        </h:panelGroup>
+        <h:panelGroup styleClass="grid-container">
+            <div class="highlight-box">
+            <p><strong>What you'll find here:</strong></p>
+            <p>• Clear and short explanations of fundamental data structures and algorithms</p>
+            <p>• Step-by-step interactive visualisations</p>
+            <p>• Information that will help you understand when and why to use specific algorithms</p>
+          </div>
+
+            <br/>
+          <h:outputText styleClass="end-welcome" value="Use the sidebar to start exploring!"/>
+        </h:panelGroup>
+        
+    </h:body>
+        
+</html>

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Queue Animation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .queue-container {
+            border: 2px solid #333;
+            width: 500px;
+            height: 120px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            background-color: #f8f8f8;
+            padding: 10px;
+            overflow: hidden;
+        }
+        .queue-end {
+            text-align: center;
+            font-weight: bold;
+            margin: 0 5px;
+            padding: 5px;
+            background-color: #ddd;
+            border: 1px solid #333;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+        .queue-elements {
+            display: flex;
+            overflow-x: hidden;
+            flex-grow: 1;
+            height: 100%;
+            align-items: center;
+        }
+        .queue-element {
+            border: 1px solid #333;
+            background-color: #2980b9;
+            color: white;
+            padding: 10px;
+            margin: 0 5px;
+            text-align: center;
+            transition: all 0.5s ease;
+            position: relative;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .queue-labels {
+            display: flex;
+            width: 500px;
+            justify-content: space-between;
+            margin-top: -15px;
+        }
+        .queue-label {
+            font-weight: bold;
+            color: #333;
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 500px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            flex: 1;
+        }
+        button:hover {
+            background-color: #3498db;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+        }
+        .status {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+        .enqueue-animation {
+            animation: slideInRight 0.5s ease forwards;
+        }
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        .dequeue-animation {
+            animation: slideOutLeft 0.5s ease forwards;
+        }
+        @keyframes slideOutLeft {
+            to {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+        }
+        .peek-highlight {
+            animation: highlight 1s ease;
+        }
+        @keyframes highlight {
+            0% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(255, 152, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">       
+        <div class="queue-visualization">
+            <div class="queue-container">
+                <div class="queue-end" id="front-end">Front</div>
+                <div class="queue-elements" id="queue-elements">
+                    <!-- Queue elements will appear here -->
+                </div>
+                <div class="queue-end" id="rear-end">Rear</div>
+            </div>
+            <div class="queue-labels">
+                <div class="queue-label">Dequeue from front</div>
+                <div class="queue-label">Enqueue at rear</div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div>
+                <input type="text" id="elementInput" placeholder="Enter a value" maxlength="8">
+            </div>
+            <div class="button-group">
+                <button id="enqueueButton">Enqueue</button>
+                <button id="dequeueButton">Dequeue</button>
+                <button id="peekButton">Peek</button>
+                <button id="clearButton">Clear</button>
+            </div>
+            <div class="status" id="status"></div>
+        </div>
+    </div>
+
+    <script>
+        // Maximum number of elements in the queue
+        const MAX_QUEUE_SIZE = 10;
+        
+        // Initialize queue array
+        let queue = [];
+        
+        // DOM elements
+        const queueElementsContainer = document.getElementById('queue-elements');
+        const elementInput = document.getElementById('elementInput');
+        const enqueueButton = document.getElementById('enqueueButton');
+        const dequeueButton = document.getElementById('dequeueButton');
+        const peekButton = document.getElementById('peekButton');
+        const clearButton = document.getElementById('clearButton');
+        const statusElement = document.getElementById('status');
+        
+        // Function to update the visual queue
+        function updateQueueView() {
+            // Clear all queue elements
+            queueElementsContainer.innerHTML = '';
+            
+            // Add each queue element to the container
+            queue.forEach((value, index) => {
+                const element = document.createElement('div');
+                element.className = 'queue-element';
+                element.textContent = value;
+                element.id = `element-${index}`;
+                queueElementsContainer.appendChild(element);
+            });
+            
+            // Update buttons state
+            dequeueButton.disabled = queue.length === 0;
+            peekButton.disabled = queue.length === 0;
+            clearButton.disabled = queue.length === 0;
+            enqueueButton.disabled = queue.length >= MAX_QUEUE_SIZE;
+            
+            // Update status
+            if (queue.length === 0) {
+                statusElement.textContent = "Queue is empty";
+            } else if (queue.length >= MAX_QUEUE_SIZE) {
+                statusElement.textContent = "Queue is full";
+            } else {
+                statusElement.textContent = `Queue has ${queue.length} element(s)`;
+            }
+        }
+        
+        // Enqueue operation
+        enqueueButton.addEventListener('click', () => {
+            const value = elementInput.value.trim();
+            if (value === '') {
+                alert('Please enter a value!');
+                return;
+            }
+            
+            if (queue.length >= MAX_QUEUE_SIZE) {
+                alert('Queue is full! Cannot enqueue more elements.');
+                return;
+            }
+            
+            // Add to queue array
+            queue.push(value);
+            
+            // Add element with animation
+            const element = document.createElement('div');
+            element.className = 'queue-element enqueue-animation';
+            element.textContent = value;
+            element.id = `element-${queue.length - 1}`;
+            queueElementsContainer.appendChild(element);
+            
+            // Clear input
+            elementInput.value = '';
+            
+            // Update buttons and status
+            dequeueButton.disabled = false;
+            peekButton.disabled = false;
+            clearButton.disabled = false;
+            enqueueButton.disabled = queue.length >= MAX_QUEUE_SIZE;
+            
+            if (queue.length >= MAX_QUEUE_SIZE) {
+                statusElement.textContent = "Queue is full";
+            } else {
+                statusElement.textContent = `Queue has ${queue.length} element(s)`;
+            }
+        });
+        
+        // Dequeue operation
+        dequeueButton.addEventListener('click', () => {
+            if (queue.length === 0) {
+                alert('Queue is empty! Cannot dequeue.');
+                return;
+            }
+            
+            // Get the front element
+            const frontElement = document.querySelector('.queue-element:first-child');
+            
+            // Add animation class
+            frontElement.classList.add('dequeue-animation');
+            
+            // Wait for animation to complete
+            setTimeout(() => {
+                // Remove from queue array
+                const dequeuedValue = queue.shift();
+                
+                // Update the view
+                updateQueueView();
+                
+                // Update status
+                statusElement.textContent = `Dequeued: ${dequeuedValue}`;
+            }, 500);
+        });
+        
+        // Peek operation
+        peekButton.addEventListener('click', () => {
+            if (queue.length === 0) {
+                alert('Queue is empty! Nothing to peek.');
+                return;
+            }
+            
+            const peekValue = queue[0];
+            
+            // Highlight the front element
+            const frontElement = document.querySelector('.queue-element:first-child');
+            frontElement.classList.add('peek-highlight');
+            
+            // Remove highlight class after animation
+            setTimeout(() => {
+                frontElement.classList.remove('peek-highlight');
+            }, 1000);
+            
+            // Show in status
+            statusElement.textContent = `Front element is: ${peekValue}`;
+        });
+        
+        // Clear operation
+        clearButton.addEventListener('click', () => {
+            if (queue.length === 0) {
+                alert('Queue is already empty!');
+                return;
+            }
+            
+            // Clear the queue array
+            queue = [];
+            
+            // Update the view
+            updateQueueView();
+            
+            // Update status
+            statusElement.textContent = "Queue has been cleared";
+        });
+        
+        // Initialize the queue view
+        updateQueueView();
+        
+        // Allow Enter key to enqueue
+        elementInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !enqueueButton.disabled) {
+                enqueueButton.click();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    xmlns:f="http://xmlns.jcp.org/jsf/core">
+          
+    <ui:composition>
+        <h:panelGroup layout="block" styleClass="side-content-container">
+           <!-- Sidebar -->
+           <h:form id="sidebar-form" styleClass="side-bar-form">
+               <h:panelGroup layout="block" styleClass="sidebar">
+                   <ui:insert name="sidebar"/>
+               </h:panelGroup>
+           </h:form>
+           
+           <!-- Main Content Area -->
+           <h:panelGroup id="mainContentPanel" styleClass="main-content-panel" layout="block">
+               <ui:insert name="content"/>
+           </h:panelGroup>
+        </h:panelGroup>
+    </ui:composition>
+</html>

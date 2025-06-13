@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <h:body> 
+        <ui:composition template ="/templates/templateWithSidePanel.xhtml">
+            <ui:define name="sidebar">
+                <h:commandLink value="Welcome" action="#{indexPageControllerBean.loadWelcome}" class="welcome-link">
+                    <f:ajax render=":mainContentPanel"/>
+                </h:commandLink>
+                 <!-- Algorithms section><!-->
+                <h3 class="category">Algorithms</h3>
+                <ul>
+                    <ui:repeat value="#{algorithmsController.items}" var="algorithm">
+                        <li>
+                            <h:commandLink value="#{algorithm.name}" action="#{algorithmsController.prepareViewFromSidebar}" styleClass="sidebar-link">
+                                <f:param name="id" value="#{algorithm.algId}"/>
+                                <f:ajax render=":mainContentPanel"/>
+                            </h:commandLink>
+                        </li>
+                    </ui:repeat>
+                </ul>
+                <h3 class="category">Data Structures</h3>
+                <ul>
+                    <ui:repeat value="#{dataStructuresController.items}" var="dataStructure">
+                        <li>
+                            <h:commandLink value="#{dataStructure.name}" action="#{dataStructuresController.prepareViewFromSidebar}" styleClass="sidebar-link">
+                                <f:param name="id" value="#{dataStructure.dsId}"/>
+                                <f:ajax render=":mainContentPanel"/>
+                            </h:commandLink>
+                        </li>
+                    </ui:repeat>
+                </ul>
+            </ui:define>
+            <ui:define name="content">
+                <ui:include src="#{indexPageControllerBean.currentPage}"></ui:include>
+            </ui:define> 
+        </ui:composition>
+    </h:body>
+</html>

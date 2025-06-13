@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Interactive Hash Map Animation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1052px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        .outer-container {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .hashmap-container {
+            width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .array-container {
+            display: flex;
+            width: 100%;
+            border: 2px solid #333;
+            background-color: #f8f8f8;
+        }
+        .array-cell {
+            flex: 1;
+            height: 50px;
+            border-right: 1px solid #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            font-weight: bold;
+        }
+        .array-cell:last-child {
+            border-right: none;
+        }
+        .linked-list-container {
+            display: flex;
+            width: 100%;
+            height: 500px;
+            position: relative;
+        }
+        .list-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        .list-connector {
+            width: 2px;
+            background-color: #555;
+            flex-grow: 1;
+            max-height: 30px;
+        }
+        .node {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 22px; /* Increased for arrow spacing */
+            opacity: 1;
+            transition: all 0.5s ease;
+            align-items: center;
+            position: relative;
+        }
+        .node-content {
+            display: flex;
+            flex-direction: column;
+            width: 56px;
+        }
+        .key-value {
+            width: 56px;
+            height: 40px;
+            border: 2px solid #333;
+            background-color: #3498db;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            text-align: center;
+        }
+        .next-pointer {
+            width: 56px;
+            height: 30px;
+            border: 2px solid #333;
+            border-top: none;
+            background-color: #e74c3c;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            position: relative;
+        }
+        .pointer-arrow {
+            width: 2px;
+            background-color: #555;
+            height: 35px;
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .arrow-head {
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid #555;
+            position: absolute;
+            bottom: -23px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-self: start;
+            gap: 10px;
+            width: 100%;
+            max-width: 500px;
+            margin-left: 20px;
+            margin-top: 100px;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        input {
+            padding: 10px;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            flex: 1;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            flex: 1;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .status {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #333;
+            width: 100%;
+            min-height: 60px;
+        }
+        .null-pointer {
+            font-size: 12px;
+            color: #555;
+            font-style: italic;
+        }
+        .highlight-animation {
+            animation: highlight 1s ease;
+        }
+        @keyframes highlight {
+            0% { background-color: inherit; }
+            50% { background-color: #ffeb3b; }
+            100% { background-color: inherit; }
+        }
+        /*Hashing visualisation*/
+        .hashing-visualization {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px black solid;
+        }
+        .hashing-steps {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            opacity: 0;
+            gap: 10px;
+            margin: 10px;
+            width: 100%;
+            transition: opacity 0.5s ease;
+        }
+        .hashing-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .current-key-value {
+            background-color: #3498db;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 60px;
+            height: 40px;
+            text-align: center;
+        }
+        .hash-function {
+            background-color: #9b59b6;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 4px;
+            width: 60px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .hash-result {
+            background-color: #e67e22;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            width: 60px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .modulo-operation {
+            background-color: #27ae60;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 4px;
+            width: 60px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .index-result {
+            background-color: #f1c40f;
+            color: black;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            width: 60px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .operation-symbol {
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 20px;
+            height: 20px;
+        }
+        .hash-details {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            width: 90%;
+            max-width: 600px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .traversal-animation {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background-color: #ff0000;
+            border-radius: 50%;
+            z-index: 100;
+            display: none;
+        }
+        .pointer {
+            position: absolute;
+            background-color: red;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            z-index: 10;
+            transition: all 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="outer-container">
+        <div class="container">
+            <!-- Hashing Visualization Section -->
+            <div class="hashing-visualization" id="hashing-visualization">
+                <div class="hashing-steps" id="hashing-steps">
+                    <div class="hashing-step">
+                        <div class="current-key-value" id="current-key-value">
+                            key:val
+                        </div>
+                        <div>Key-Value</div>
+                    </div>
+                    
+                    <div class="operation-symbol">→
+                        <br>
+                    </div>
+                    
+                    <div class="hashing-step">
+                        <div class="hash-function" id="hash-function">
+                            Hashing Function
+                        </div>
+                        <div>Sum of char</div>
+                    </div>
+                    
+                    <div class="operation-symbol">=</div>
+                    
+                    <div class="hashing-step">
+                        <div class="hash-result" id="hash-result">
+                            0
+                        </div>
+                        <div>Hash Value</div>
+                    </div>
+                    
+                    <div class="operation-symbol">%</div>
+                    
+                    <div class="hashing-step">
+                        <div class="modulo-operation" id="modulo-operation">
+                            Modulo by 8
+                        </div>
+                        <div>Array Size</div>
+                    </div>
+                    
+                    <div class="operation-symbol">=</div>
+                    
+                    <div class="hashing-step">
+                        <div class="index-result" id="index-result">
+                            0
+                        </div>
+                        <div>Index</div>
+                    </div>
+                </div>
+                
+                <div class="hash-details" id="hash-details">
+                    <div class="status" id="status">HashMap is empty. Ready for operations.</div>
+                </div>
+            </div>
+            
+            
+            <!-- Traversal Pointer for Animation -->
+            <div class="traversal-animation" id="traversal-pointer"></div>
+
+            <div class="hashmap-container">
+                <div class="array-container" id="array-container">
+                    <!-- Array cells will be generated here -->
+                </div>
+                <div class="linked-list-container" id="linked-list-container">
+                    <!-- Linked lists will be generated here -->
+                </div>
+            </div>
+        </div>
+        <div class="controls">
+            <div class="input-group">
+                <input type="text" id="keyInput" placeholder="Enter key" maxlength="5">
+                <input type="text" id="valueInput" placeholder="Enter value" maxlength="5">
+            </div>
+            <div class="button-group">
+                <button id="putButton">Put</button>
+                <button id="getButton">Get</button>
+                <button id="removeButton">Remove</button>
+                <button id="clearButton">Clear All</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // HashMap configuration
+        const ARRAY_SIZE = 8; // Number of buckets
+        
+        // Initialize the HashMap
+        let hashMap = new Array(ARRAY_SIZE).fill().map(() => []);
+
+        // Track animation timeouts
+        let hashingAnimationTimeout = null;
+        
+        // DOM elements
+        const arrayContainer = document.getElementById('array-container');
+        const linkedListContainer = document.getElementById('linked-list-container');
+        const keyInput = document.getElementById('keyInput');
+        const valueInput = document.getElementById('valueInput');
+        const putButton = document.getElementById('putButton');
+        const getButton = document.getElementById('getButton');
+        const removeButton = document.getElementById('removeButton');
+        const clearButton = document.getElementById('clearButton');
+        const statusElement = document.getElementById('status');
+        const hashingSteps = document.getElementById('hashing-steps');
+        const currentKeyValue = document.getElementById('current-key-value');
+        const hashResult = document.getElementById('hash-result');
+        const indexResult = document.getElementById('index-result');
+        const hashDetails = document.getElementById('hash-details');
+        const traversalPointer = document.getElementById('traversal-pointer');
+
+        // Animation Speeds
+        const HASH_VISUALIZATION_DURATION = 5000;     // How long the hash visualization stays visible
+        const ARRAY_CELL_HIGHLIGHT_DELAY = 1000;      // Delay before highlighting the array cell
+        const TRAVERSAL_ANIMATION_SPEED = 500;        // Speed of traversal animation between nodes
+        const NODE_HIGHLIGHT_DURATION = 700;          // How long each node stays highlighted during traversal
+        const OPERATION_ANIMATION_DELAY = 1500;       // Delay after showing hash before operation starts
+        const NODE_REMOVAL_DELAY = 500;                // Delay before removing a node after animation
+        
+        // Initialize the hash map visualization
+        function initializeHashMap() {
+            // Create array cells
+            arrayContainer.innerHTML = '';
+            linkedListContainer.innerHTML = '';
+            
+            for (let i = 0; i < ARRAY_SIZE; i++) {
+                // Create array cell
+                const arrayCell = document.createElement('div');
+                arrayCell.className = 'array-cell';
+                arrayCell.textContent = i;
+                arrayCell.id = `array-cell-${i}`;
+                arrayContainer.appendChild(arrayCell);
+                
+                // Create linked list column
+                const listColumn = document.createElement('div');
+                listColumn.className = 'list-column';
+                listColumn.id = `list-column-${i}`;
+                linkedListContainer.appendChild(listColumn);
+            }
+            
+            // Update the linked lists
+            updateLinkedLists();
+        }
+        
+        // Hash function
+        function hashFunction(key) {
+            // Simple hash function for demonstration
+            let hash = 0;
+            for (let i = 0; i < key.length; i++) {
+                hash += key.charCodeAt(i);
+            }
+            return hash % ARRAY_SIZE;
+        }
+        
+        // Calculate hash details for displaying
+        function calculateHashDetails(key) {
+            let hash = 0;
+            let charDetails = [];
+            
+            for (let i = 0; i < key.length; i++) {
+                const charCode = key.charCodeAt(i);
+                hash += charCode;
+                charDetails.push(`'${key[i]}' (${charCode})`);
+            }
+            
+            return {
+                hash: hash,
+                indexAfterModulo: hash % ARRAY_SIZE,
+                details: charDetails
+            };
+        }
+        
+        // Update the linked lists visualization
+        function updateLinkedLists() {
+            // Clear all linked lists
+            for (let i = 0; i < ARRAY_SIZE; i++) {
+                const listColumn = document.getElementById(`list-column-${i}`);
+                listColumn.innerHTML = '';
+                
+                // If the bucket has elements, show the connector from array to first node
+                if (hashMap[i].length > 0) {
+                    const connector = document.createElement('div');
+                    connector.className = 'list-connector';
+                    listColumn.appendChild(connector);
+                }
+                
+                // Create nodes for each item in the bucket
+                hashMap[i].forEach((item, nodeIndex) => {
+                    const node = createNodeElement(item.key, item.value, nodeIndex < hashMap[i].length - 1);
+                    listColumn.appendChild(node);
+                });
+            }
+            
+            // Update status
+            updateStatus();
+        }
+        
+        // Create a node element
+        function createNodeElement(key, value, hasNext) {
+            const node = document.createElement('div');
+            node.className = 'node';
+            
+            // Node content (key-value and next pointer) stacked vertically
+            const nodeContent = document.createElement('div');
+            nodeContent.className = 'node-content';
+            
+            // Key-value box
+            const keyValueBox = document.createElement('div');
+            keyValueBox.className = 'key-value';
+            keyValueBox.textContent = `${key}:${value}`;
+            nodeContent.appendChild(keyValueBox);
+            
+            // Next pointer box
+            const nextPointerBox = document.createElement('div');
+            nextPointerBox.className = 'next-pointer';
+            
+            nodeContent.appendChild(nextPointerBox);
+            node.appendChild(nodeContent);
+            
+            // If has next, add connector to next node (vertical line for spacing)
+            if (hasNext) {
+                const connector = document.createElement('div');
+                connector.className = 'pointer-arrow';
+                node.appendChild(connector);
+                
+                const arrowHead = document.createElement('div');
+                arrowHead.className = 'arrow-head';
+                node.appendChild(arrowHead);
+            } else {
+                // No next node - show null
+                nextPointerBox.textContent = 'null';
+                nextPointerBox.classList.add('null-pointer');
+            }
+            
+            return node;
+        }
+        
+        // Update status message
+        function updateStatus() {
+            let itemCount = 0;
+            hashMap.forEach(bucket => {
+                itemCount += bucket.length;
+            });
+            
+            if (itemCount === 0) {
+                statusElement.textContent = "HashMap is empty. Ready for operations.";
+            } else {
+                statusElement.textContent = `HashMap contains ${itemCount} item(s). Each item is stored in a bucket determined by its hash value % ${ARRAY_SIZE}.`;
+            }
+        }
+        
+        // Show hashing process animation
+        function showHashingAnimation(key, value, hashDetails) {
+             // Force any ongoing animations to complete
+            if (hashingAnimationTimeout) {
+                clearTimeout(hashingAnimationTimeout);
+                hashingAnimationTimeout = null;
+            }
+            
+            // Make sure steps are visible
+            hashingSteps.style.display = "flex";  // Ensure it's displayed
+            hashingSteps.style.opacity = "1";     // Make it fully visible immediately
+            
+            // Update values
+            currentKeyValue.textContent = `${key}:${value}`;
+            hashResult.textContent = hashDetails.hash;
+            indexResult.textContent = hashDetails.indexAfterModulo;
+            
+            // Highlight the target array cell
+            const arrayCell = document.getElementById(`array-cell-${hashDetails.indexAfterModulo}`);
+            setTimeout(() => {
+                arrayCell.classList.add('highlight-animation');
+            }, ARRAY_CELL_HIGHLIGHT_DELAY);
+        }
+        
+        // Animate traversal of linked list
+        function animateTraversal(index, targetPosition) {
+            return new Promise((resolve) => {
+                const listColumn = document.getElementById(`list-column-${index}`);
+                const nodes = listColumn.querySelectorAll('.node');
+                
+                if (nodes.length === 0 || targetPosition >= nodes.length) {
+                    resolve();
+                    return;
+                }
+                
+                // Show the traversal pointer
+                traversalPointer.style.display = 'block';
+                
+                // Position at the array cell first
+                const arrayCell = document.getElementById(`array-cell-${index}`);
+                const arrayCellRect = arrayCell.getBoundingClientRect();
+                
+                traversalPointer.style.left = `${arrayCellRect.left + arrayCellRect.width / 2 - 7.5}px`;
+                traversalPointer.style.top = `${arrayCellRect.bottom + 10}px`;
+                
+                let currentNode = 0;
+                
+                // Function to move to next node
+                function moveToNextNode() {
+                    if (currentNode <= targetPosition) {
+                        const nodeRect = nodes[currentNode].getBoundingClientRect();
+                        
+                        // Animate movement to current node
+                        traversalPointer.style.transition = `all ${TRAVERSAL_ANIMATION_SPEED / 1000}s ease`;
+                        traversalPointer.style.left = `${nodeRect.left + nodeRect.width / 2 - 7.5}px`;
+                        traversalPointer.style.top = `${nodeRect.top + nodeRect.height / 2 - 7.5}px`;
+                        
+                        // Highlight current node
+                        setTimeout(() => {
+                            nodes[currentNode].querySelector('.key-value').classList.add('highlight-animation');
+                            
+                            // Move to next node or finish
+                            currentNode++;
+                            if (currentNode <= targetPosition) {
+                                setTimeout(moveToNextNode, NODE_HIGHLIGHT_DURATION);
+                            } else {
+                                // Finished traversal
+                                setTimeout(() => {
+                                    traversalPointer.style.display = 'none';
+                                    resolve();
+                                }, TRAVERSAL_ANIMATION_SPEED);
+                            }
+                        }, TRAVERSAL_ANIMATION_SPEED);
+                    } else {
+                        traversalPointer.style.display = 'none';
+                        resolve();
+                    }
+                }
+                
+                // Start the animation
+                setTimeout(moveToNextNode, TRAVERSAL_ANIMATION_SPEED);
+            });
+        }
+        
+        // Put operation
+        putButton.addEventListener('click', async () => {
+            const key = keyInput.value.trim();
+            const value = valueInput.value.trim();
+            
+            if (key === '') {
+                alert('Please enter a key!');
+                return;
+            }
+            
+            if (value === '') {
+                alert('Please enter a value!');
+                return;
+            }
+            
+            // Calculate hash and get details
+            const hashDetails = calculateHashDetails(key);
+            const index = hashDetails.indexAfterModulo;
+            
+            // Show hashing animation
+            showHashingAnimation(key, value, hashDetails);
+            
+            // Check if key already exists
+            const existingItemIndex = hashMap[index].findIndex(item => item.key === key);
+            
+            let statusMessage = '';
+            
+            // Wait for initial animations
+            await new Promise(resolve => setTimeout(resolve, OPERATION_ANIMATION_DELAY));
+            
+            if (existingItemIndex !== -1) {
+                // Animate traversal to existing item
+                await animateTraversal(index, existingItemIndex);
+                
+                // Update existing key
+                const oldValue = hashMap[index][existingItemIndex].value;
+                hashMap[index][existingItemIndex].value = value;
+                
+                statusMessage = `UPDATED: Key '${key}' already exists at index ${index}. `
+                    + `\nSince the key already exists at position ${existingItemIndex} in the chain, its value was updated from '${oldValue}' to '${value}'.`;
+                
+                // Update visualization
+                updateLinkedLists();
+                
+                // Highlight the updated node
+                setTimeout(() => {
+                    const listColumn = document.getElementById(`list-column-${index}`);
+                    const nodes = listColumn.querySelectorAll('.node');
+                    nodes[existingItemIndex].querySelector('.key-value').classList.add('highlight-animation');
+                }, 100);
+            } else {
+                // If there are existing nodes in this bucket, show traversal
+                if (hashMap[index].length > 0) {
+                    await animateTraversal(index, hashMap[index].length - 1);
+                }
+                
+                // Add new key-value pair
+                hashMap[index].push({ key, value });
+                
+                const chainPosition = hashMap[index].length - 1;
+                statusMessage = `ADDED: New key '${key}' with value '${value}' at index ${index}. `;
+                
+                if (chainPosition > 0) {
+                    statusMessage += `\nCollision occurred! Added as node ${chainPosition+1} in the chain at index ${index}.`;
+                } else {
+                    statusMessage += `\nAdded as the first node in the chain at index ${index}.`;
+                }
+                
+                // Update visualization
+                updateLinkedLists();
+                
+                // Add animation to the newly added node
+                setTimeout(() => {
+                    const listColumn = document.getElementById(`list-column-${index}`);
+                    const nodes = listColumn.querySelectorAll('.node');
+                    const lastNode = nodes[nodes.length - 1];
+                    if (lastNode) {
+                        lastNode.classList.add('add-animation');
+                    }
+                }, 100);
+            }
+            
+            // Clear inputs
+            keyInput.value = '';
+            valueInput.value = '';
+            
+            // Update status message
+            statusElement.textContent = statusMessage;
+            
+            // Hide hashing visualization after a delay
+            hashingAnimationTimeout = setTimeout(() => {
+                hashingSteps.style.opacity = "0";
+            }, HASH_VISUALIZATION_DURATION);
+        });
+        
+        // Get operation
+        getButton.addEventListener('click', async () => {
+            const key = keyInput.value.trim();
+            
+            if (key === '') {
+                alert('Please enter a key to search!');
+                return;
+            }
+            
+            // Calculate hash and get details
+            const hashDetails = calculateHashDetails(key);
+            const index = hashDetails.indexAfterModulo;
+            
+            // Show hashing animation
+            showHashingAnimation(key, "", hashDetails);
+            
+            // Find the item in the bucket
+            const item = hashMap[index].find(item => item.key === key);
+            const itemIndex = hashMap[index].findIndex(item => item.key === key);
+            
+            let statusMessage = '';
+            
+            // Wait for initial animations
+            await new Promise(resolve => setTimeout(resolve, NODE_HIGHLIGHT_DURATION));
+            
+            if (item) {
+                // Animate traversal to the item
+                await animateTraversal(index, itemIndex);
+                
+                // Item found
+                statusMessage = `FOUND: Key '${key}' has value '${item.value}' at index ${index}. `;
+                
+                if (itemIndex > 0) {
+                    statusMessage += `\nTraversed ${itemIndex + 1} nodes in the chain to find the key.`;
+                } else {
+                    statusMessage += `\nFound at the first node in the chain.`;
+                }
+                
+                valueInput.value = item.value;
+                
+                // Update the current key-value display
+                currentKeyValue.textContent = `${key}:${item.value}`;
+            } else {
+                // Animate traversal through all nodes in the bucket
+                if (hashMap[index].length > 0) {
+                    await animateTraversal(index, hashMap[index].length - 1);
+                }
+                
+                // Item not found
+                statusMessage = `NOT FOUND: Key '${key}' not found in the HashMap. `
+                    + `\nLookup at index ${index} completed, but the key was not found in the chain.`;
+                
+                valueInput.value = '';
+            }
+            
+            // Update status message
+            statusElement.textContent = statusMessage;
+            
+            // Hide hashing visualization after a delay
+            hashingAnimationTimeout = setTimeout(() => {
+                hashingSteps.style.opacity = "0";
+            }, HASH_VISUALIZATION_DURATION);
+        });
+        
+        // Remove operation
+        removeButton.addEventListener('click', async () => {
+            const key = keyInput.value.trim();
+            
+            if (key === '') {
+                alert('Please enter a key to remove!');
+                return;
+            }
+            
+            // Calculate hash and get details
+            const hashDetails = calculateHashDetails(key);
+            const index = hashDetails.indexAfterModulo;
+            
+            // Show hashing animation
+            showHashingAnimation(key, "", hashDetails);
+            
+            // Find the item in the bucket
+            const itemIndex = hashMap[index].findIndex(item => item.key === key);
+            
+            let statusMessage = '';
+            
+            // Wait for initial animations
+            await new Promise(resolve => setTimeout(resolve, NODE_HIGHLIGHT_DURATION));
+            
+            if (itemIndex !== -1) {
+                // Animate traversal to the item
+                await animateTraversal(index, itemIndex);
+                
+                // Get node to animate
+                const listColumn = document.getElementById(`list-column-${index}`);
+                const nodes = listColumn.querySelectorAll('.node');
+                const nodeToRemove = nodes[itemIndex];
+                
+                // Add delete animation
+                nodeToRemove.classList.add('delete-animation');
+                
+                const itemValue = hashMap[index][itemIndex].value;
+                
+                statusMessage = `REMOVED: Key '${key}' with value '${itemValue}' from index ${index}`;
+                
+                if (itemIndex > 0) {
+                    statusMessage += `\nTraversed ${itemIndex + 1} nodes in the chain to find and remove the key.`;
+                } else {
+                    statusMessage += `\nRemoved from the first node in the chain.`;
+                }
+                
+                if (hashMap[index].length > 1) {
+                    statusMessage += `\nRemaining ${hashMap[index].length - 1} node(s) in the chain were relinked.`;
+                }
+                
+                // Remove after animation
+                setTimeout(() => {
+                    // Remove item from hashMap
+                    hashMap[index].splice(itemIndex, 1);
+                    
+                    // Update the visualization
+                    updateLinkedLists();
+                    
+                    // Clear inputs
+                    keyInput.value = '';
+                    valueInput.value = '';
+                    
+                    // Update status message
+                    statusElement.textContent = statusMessage;
+                    // Update status message
+                    statusElement.textContent = statusMessage;
+                }, NODE_REMOVAL_DELAY);
+            } else {
+                // Animate traversal through all nodes in the bucket if there are any
+                if (hashMap[index].length > 0) {
+                    await animateTraversal(index, hashMap[index].length - 1);
+                }
+                
+                // Item not found
+                statusMessage = `NOT FOUND: Key '${key}' not found in the HashMap. `
+                    + `\nLookup at index ${index} completed, but the key was not found in the chain.`;
+                
+                // Clear inputs
+                keyInput.value = '';
+                valueInput.value = '';
+            }
+            
+            // Update status message
+            statusElement.textContent = statusMessage;
+            
+            // Hide hashing visualization after a delay
+            setTimeout(() => {
+                hashingSteps.style.opacity = "0";
+            }, HASH_VISUALIZATION_DURATION);
+        });
+        
+        // Clear All operation
+        clearButton.addEventListener('click', () => {
+            // Clear the hash map
+            hashMap = new Array(ARRAY_SIZE).fill().map(() => []);
+            
+            // Reset the visualization
+            updateLinkedLists();
+            
+            // Clear inputs
+            keyInput.value = '';
+            valueInput.value = '';
+            
+            // Update status
+            statusElement.textContent = 'HashMap cleared. All elements have been removed.';
+            
+            // Clear any pending animation
+            if (hashingAnimationTimeout) {
+                clearTimeout(hashingAnimationTimeout);
+                hashingAnimationTimeout = null;
+            }
+
+            // Hide hashing visualization
+            hashingSteps.style.opacity = "0";
+        });
+        
+        // Initialize the visualization
+        initializeHashMap();
+    </script>
+</body>
+</html>

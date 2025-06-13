@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
+    
+    <h:body>
+        <ui:composition>
+            <div class="header-container">
+                <div class="logo-area">
+                    <h:link outcome="/index.xhtml?faces-redirect=true">
+                        <h:graphicImage library="images" name="DSA_logo.png" styleClass="logo-image"/>
+                    </h:link>
+                </div>
+                <div class="nav-links">
+                    <h:form class="header-links">
+                        <h:link value="About" styleClass="nav-link about-link" outcome="about?faces-redirect=true"></h:link>
+                        
+                        <!-- Only shown when the user is NOT logged in -->  
+                        <h:panelGroup styleClass="user-btn-group" rendered="#{!loginBean.loggedIn}">
+                            <h:link value="Sign Up" styleClass="nav-link signup-btn" outcome="signup?faces-redirect=true"></h:link>
+                            <h:link value="Login" styleClass="nav-link login-btn" outcome="login?faces-redirect=true"></h:link>
+                        </h:panelGroup>
+                        
+                        <!-- Show when the user IS logged in -->
+                        <h:panelGroup styleClass="user-dropdown" rendered="#{loginBean.loggedIn}">
+                            <h:commandButton id="userDropdownBtn" value="My Account" styleClass="user-dropdown-btn"
+                                             onclick="toggleUserDropdown(); return false;"/>
+                        
+                            <div id="userDropdownMenu" class="dropdown-content">
+                                <div class="dropdown-header">
+                                    <h:outputText value="#{loginBean.currentUser.username}" styleClass="dropdown-username"/>
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                <h:link outcome="/accountsettings" value="Account settings" styleClass="dropdown-item"/>
+                                <!-- Only visible to admins -->
+                                <h:panelGroup rendered="#{loginBean.admin}">
+                                    <div class="dropdown-divider"></div>
+                                    <h:link outcome="/adminpanel" value="Admin panel" styleClass="dropdown-item"/>
+                                </h:panelGroup>
+                                <div class="dropdown-divider"></div>
+                                <h:commandLink action="#{loginBean.logout}" value="Logout" styleClass="dropdown-item logout-item"/>
+                            </div>
+                        </h:panelGroup>
+                    </h:form>
+                </div>
+            </div>
+            
+            <h:outputScript library="js" name="dropdown.js"/>
+            
+        </ui:composition>
+    </h:body>
+</html>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/XHtml.xhtml to edit this template
+-->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    
+    <h:body>
+        <h:panelGroup styleClass="accounts-header-container" layout="block">
+            <div>
+                <h:outputText value="Welcome  " styleClass="accounts-header-title"/>
+                <h:outputText value="#{loginBean.currentUser.username}" styleClass="accounts-header-info"/> 
+            </div>
+            <div>
+                <h:outputText value="Role:" styleClass="accounts-header-title"/>
+                <h:outputText value="#{loginBean.currentUser.role}" styleClass="accounts-header-info"/>
+            </div>
+        </h:panelGroup>
+        
+        <h:panelGroup styleClass="accounts-info-panel" layout="block">
+            <div class="accounts-titles">Email:</div>
+            <div class="accounts-text-info">#{loginBean.currentUser.email}</div>
+        </h:panelGroup>
+        
+        <h:panelGroup styleClass="accounts-info-panel" layout="block">
+            <div class="accounts-titles">First Name:</div>
+            <div class="accounts-text-info">#{loginBean.currentUser.firstName}</div>
+        </h:panelGroup>
+        
+        <h:panelGroup styleClass="accounts-info-panel" layout="block">
+            <div class="accounts-titles">Last Name:</div>
+            <div class="accounts-text-info">#{loginBean.currentUser.lastName}</div>
+        </h:panelGroup>
+    </h:body>
+</html>

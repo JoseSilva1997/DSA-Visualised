@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/XHtml.xhtml to edit this template
+-->
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:body>
+        <ui:composition template ="/templates/templateWithSidePanel.xhtml">
+            <ui:define name="sidebar">
+                
+                <!-- Admin dashboard -->
+                <h:panelGroup styleClass='sidebar-item'>
+                    <h:commandLink value='Dashboard' action="#{adminPageControllerBean.loadDashboard}" styleClass='welcome-link'>
+                        <f:ajax render="mainContentPanel"/>
+                    </h:commandLink>
+                    
+                </h:panelGroup>
+                
+                <h3 class="category">Actions:</h3>
+                
+                <!--Create button with dropdown -->
+                <div class="sidebar-item">
+                    <h:commandLink value="Create" styleClass="sidebar-link-admin"
+                                   onclick="toggleAdminDropdown('createDropdown'); return false;"/>
+                    <div id="createDropdown" class="admin-dropdown-content">
+                        <h:commandLink action="#{adminPageControllerBean.loadAlgorithmsCreate}" value="Algorithm" styleClass="admin-dropdown-item">
+                            <f:ajax render="mainContentPanel"/>
+                        </h:commandLink>
+                        <h:commandLink action="#{adminPageControllerBean.loadDataStructuresCreate}" 
+                                       value="Data Structure" styleClass="admin-dropdown-item">
+                            <f:ajax render="mainContentPanel" />
+                        </h:commandLink>
+                    </div>
+                </div>
+                            
+                <!-- Update button with dropdown -->
+                <div class="sidebar-item">
+                    <h:commandLink value="Update" styleClass="sidebar-link-admin"
+                                  onclick="toggleAdminDropdown('updateDropdown'); return false;"/>
+                    <div id="updateDropdown" class="admin-dropdown-content">
+                        <h:commandLink action="#{adminPageControllerBean.loadAlgorithmsEdit}" 
+                                       value="Algorithm" styleClass="admin-dropdown-item">
+                            <f:ajax render="mainContentPanel" />
+                        </h:commandLink>
+                        <h:commandLink action="#{adminPageControllerBean.loadDataStructuresEdit}" 
+                                       value="Data Structure" styleClass="admin-dropdown-item">
+                            <f:ajax render="mainContentPanel" />
+                        </h:commandLink>
+                    </div>
+                </div>
+                            
+                <!-- Delete button with dropdown -->
+                <div class="sidebar-item">
+                    <h:commandLink value="Delete" styleClass="sidebar-link-admin"
+                                  onclick="toggleAdminDropdown('deleteDropdown'); return false;"/>
+                    <div id="deleteDropdown" class="admin-dropdown-content">
+                        <h:commandLink action="#{adminPageControllerBean.loadAlgorithmsDelete}" 
+                                       value="Algorithm" styleClass="admin-dropdown-item">
+                            <f:ajax render="mainContentPanel" />
+                        </h:commandLink>
+                        <h:commandLink action="#{adminPageControllerBean.loadDataStructuresDelete}" 
+                                       value="Data Structure" styleClass="admin-dropdown-item">
+                            <f:ajax render="mainContentPanel" />
+                        </h:commandLink>
+                    </div>
+                </div>
+            </ui:define>
+            <ui:define name="content">
+                <ui:include src="#{adminPageControllerBean.currentPage}"></ui:include>
+            </ui:define>
+        </ui:composition>
+    </h:body>
+</html>
