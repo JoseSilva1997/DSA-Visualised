@@ -13,12 +13,12 @@ Technologies Used:
 Follow these steps to set up and run the project on your local machine using NetBeans, GlassFish, and Derby.
 
 1 - Clone repository:
-  - git clone https://github.com/JoseSilva1997/DSA-Visualised.git
+  git clone https://github.com/JoseSilva1997/DSA-Visualised.git
 
 2 - Open Project on Netbeans:
-  - Open NetBeans IDE.
-  - Go to File → Open Project.
-  - Navigate to the cloned folder and open the project.
+  Open NetBeans IDE.
+  Go to File → Open Project.
+  Navigate to the cloned folder and open the project.
 
 3 - Setup the database (Apache Derby):
   - Go to the database + data folder in the project root.
